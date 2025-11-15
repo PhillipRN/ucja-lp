@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>申込完了 - UCJA</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            max-width: 200px;
+            height: auto;
+        }
+        h1 {
+            color: #007bff;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #6BBBAE;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #6BBBAE;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #666;
+        }
+        .important {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 お申込みありがとうございます</h1>
+        </div>
+        
+        <p>{{name}} 様</p>
+        
+        <p>UCJA英語力選手権へのお申込みを受け付けました。<br>
+        以下の内容をご確認ください。</p>
+        
+        <div class="info-box">
+            <strong>申込番号：</strong>{{application_number}}<br>
+            <strong>参加形式：</strong>{{participation_type}}<br>
+            <strong>お名前：</strong>{{name}}<br>
+            <strong>メールアドレス：</strong>{{email}}
+        </div>
+        
+        <div class="important">
+            <strong>⚠️ 次のステップ</strong><br>
+            1. 本人確認（学生証の撮影）<br>
+            2. お支払い手続き<br>
+            <br>
+            マイページから手続きを進めてください。
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="{{mypage_url}}" class="button">マイページへログイン</a>
+        </div>
+        
+        <p><strong>ログイン情報：</strong></p>
+        <div class="info-box">
+            メールアドレス：{{email}}<br>
+            申込番号：{{application_number}}
+        </div>
+        
+        <p>ご不明な点がございましたら、お気軽にお問い合わせください。</p>
+        
+        <div class="footer">
+            <p>UNIVERSITY CAMBRIDGE JAPAN CONSULTING SUPERVISOR Co., Ltd.<br>
+            お問い合わせ: contact@univ-cambridge-japan.academy<br>
+            <a href="{{website_url}}">公式サイト</a></p>
+        </div>
+    </div>
+</body>
+</html>
+

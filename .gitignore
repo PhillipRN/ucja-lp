@@ -1,0 +1,46 @@
+# Configuration files
+config/config.php
+.env
+
+# Composer
+vendor/
+composer.lock
+
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Cache
+cache/
+*.cache
+
+# Session files
+sessions/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Node modules (if using any frontend build tools)
+node_modules/
+
+# Build artifacts
+dist/
+build/
+

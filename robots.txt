@@ -1,0 +1,64 @@
+# UNIV.Cambridge Japan Academy - 英単語高校選手権
+# 検索エンジン向けrobots.txt設定
+
+User-agent: *
+# メインサイトは検索対象
+Allow: /
+Allow: /index.php
+Allow: /company.php
+Allow: /team-flow.php
+Allow: /privacy.php
+Allow: /terms.php
+Allow: /tokusho.php
+Allow: /images/
+Allow: /components/
+
+# 管理画面は検索対象外
+Disallow: /admin/
+Disallow: /my-page/
+
+# API・決済関連は検索対象外
+Disallow: /api/
+Disallow: /login.php
+Disallow: /logout.php
+Disallow: /stripe-checkout-payment.php
+Disallow: /stripe-checkout-setup.php
+Disallow: /payment-complete.php
+Disallow: /kyc-verification.php
+Disallow: /kyc-complete.php
+Disallow: /application-complete.php
+Disallow: /setup-complete.php
+
+# テスト・設定ファイルは検索対象外
+Disallow: /test-*.php
+Disallow: /vendor/
+Disallow: /config/
+Disallow: /database/
+Disallow: /lib/
+Disallow: /*.sh
+Disallow: /*.bat
+Disallow: /*.json
+Disallow: /*.lock
+Disallow: /*.md
+Disallow: /*.txt$
+Disallow: /composer.phar
+
+# 画像は全て許可
+Allow: /images/*.jpg
+Allow: /images/*.jpeg
+Allow: /images/*.png
+Allow: /images/*.gif
+Allow: /images/*.webp
+
+# クローラー別設定
+User-agent: Googlebot
+Disallow: /admin/
+Disallow: /my-page/
+Disallow: /api/
+
+User-agent: Googlebot-Image
+Allow: /images/
+
+# サイトマップ（検索エンジンがサイト構造を理解しやすくする）
+Sitemap: https://challenge.univ-cambridge-japan.academy/sitemap.xml
+

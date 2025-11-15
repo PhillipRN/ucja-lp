@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お知らせ - UCJA</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #6BBBAE;
+        }
+        h1 {
+            color: #007bff;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .content {
+            margin: 30px 0;
+            white-space: pre-wrap;
+        }
+        .button {
+            display: inline-block;
+            background-color: #6BBBAE;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📢 {{subject}}</h1>
+            <p style="color: #666; font-size: 14px;">{{send_date}}</p>
+        </div>
+        
+        <p>{{name}} 様</p>
+        
+        <p>いつもUCJA英語力選手権をご利用いただきありがとうございます。</p>
+        
+        <div class="content">
+{{message}}
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="{{mypage_url}}" class="button">マイページで確認</a>
+        </div>
+        
+        <p style="font-size: 14px; color: #666; margin-top: 30px;">
+        ※このメールは送信専用です。ご返信いただいても対応できかねます。<br>
+        ご質問・お問い合わせは公式サイトのお問い合わせフォームをご利用ください。
+        </p>
+        
+        <div class="footer">
+            <p>UNIVERSITY CAMBRIDGE JAPAN CONSULTING SUPERVISOR Co., Ltd.<br>
+            お問い合わせ: contact@univ-cambridge-japan.academy<br>
+            <a href="{{website_url}}">公式サイト</a></p>
+        </div>
+    </div>
+</body>
+</html>
+
