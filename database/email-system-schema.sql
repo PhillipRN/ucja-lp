@@ -109,6 +109,9 @@ CREATE TABLE IF NOT EXISTS email_templates (
     description TEXT,
     sendgrid_template_id VARCHAR(100) UNIQUE, -- SendGrid Dynamic Template ID
     
+    -- 送信設定
+    recipient_type VARCHAR(30) DEFAULT 'guardian',
+
     -- テンプレート内容（プレビュー用）
     subject VARCHAR(255),
     preview_html TEXT,

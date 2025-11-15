@@ -25,6 +25,7 @@ CREATE TABLE email_templates (
     body_html TEXT, -- HTML版
     
     -- メタ情報
+    recipient_type VARCHAR(30) DEFAULT 'guardian', -- guardian, participant, guardian_and_participant, team_members, custom など
     category VARCHAR(50) DEFAULT 'automatic', -- automatic, manual, notification
     sort_order INTEGER DEFAULT 0, -- 表示順序
     variables JSONB, -- 使用可能な変数のリスト（ドキュメント用）

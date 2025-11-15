@@ -58,11 +58,48 @@ include __DIR__ . '/components/header.php';
                     </label>
                     <input type="text" id="editSubject" required
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <p class="text-xs text-gray-500 mt-1">
-                        使用可能な変数: <code class="bg-gray-100 px-1 py-0.5 rounded">{{application_number}}</code>
-                        <code class="bg-gray-100 px-1 py-0.5 rounded">{{student_name}}</code>
-                        <code class="bg-gray-100 px-1 py-0.5 rounded">{{team_name}}</code>
+                    <div class="mt-3 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <p class="text-xs text-gray-500 mb-2">
+                            使用可能な変数（テンプレート種別ごとに変わります）：
+                        </p>
+                        <div id="variableList" class="flex flex-wrap gap-2 text-xs"></div>
+                        <p class="text-[11px] text-gray-400 mt-2">
+                            例）本文に <code class="bg-white px-1 py-0.5 rounded border">{{application_number}}</code> と記述すると、申込番号が差し込まれます。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 送信先選択 -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        送信先
+                    </label>
+                    <p class="text-xs text-gray-500 mb-3">
+                        送信先を1つ以上選択してください（複数選択可能）。選択されたすべての宛先にメールが送信されます。
                     </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <label class="flex items-start p-3 border rounded-lg cursor-pointer hover:border-blue-400 transition-colors">
+                            <input type="checkbox" id="recipientGuardian" class="mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <div class="ml-3">
+                                <p class="font-medium text-gray-800">保護者</p>
+                                <p class="text-xs text-gray-500">申込時に登録された保護者メールアドレス宛</p>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 border rounded-lg cursor-pointer hover:border-blue-400 transition-colors">
+                            <input type="checkbox" id="recipientParticipant" class="mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <div class="ml-3">
+                                <p class="font-medium text-gray-800">参加者本人</p>
+                                <p class="text-xs text-gray-500">個人: 申込者本人 / チーム: 操作したメンバー or 代表者</p>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 border rounded-lg cursor-pointer hover:border-blue-400 transition-colors">
+                            <input type="checkbox" id="recipientTeamMembers" class="mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <div class="ml-3">
+                                <p class="font-medium text-gray-800">チームメンバー</p>
+                                <p class="text-xs text-gray-500">チーム戦の全メンバーに同報送信</p>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
                 <!-- タブ切り替え -->
@@ -155,6 +192,120 @@ include __DIR__ . '/components/header.php';
 <script>
 let templates = [];
 let currentTab = 'text';
+const RECIPIENT_ORDER = ['guardian', 'participant', 'team_members'];
+const recipientCheckboxIds = {
+    guardian: 'recipientGuardian',
+    participant: 'recipientParticipant',
+    team_members: 'recipientTeamMembers'
+};
+const recipientLabelMap = {
+    guardian: '保護者',
+    participant: '参加者本人',
+    team_members: 'チームメンバー'
+};
+const templateVariableMap = {
+    application_confirmation: ['guardian_name', 'application_number', 'participation_type', 'participant_name', 'amount', 'card_registration_url'],
+    card_registration: ['guardian_name', 'application_number', 'card_registration_url'],
+    card_registration_completed: ['guardian_name', 'participant_name', 'application_number', 'mypage_url'],
+    kyc_required: ['guardian_name', 'application_number', 'mypage_url', 'participant_name'],
+    kyc_completed: ['guardian_name', 'participant_name', 'application_number', 'amount'],
+    payment_confirmation: ['guardian_name', 'participant_name', 'application_number', 'amount', 'payment_date', 'exam_date', 'mypage_url'],
+    exam_reminder: ['guardian_name', 'application_number', 'exam_date', 'meeting_time', 'venue_name', 'venue_address', 'emergency_contact', 'map_url', 'mypage_url'],
+    team_member_payment: ['member_name', 'team_name', 'representative_name', 'amount', 'application_number', 'payment_link', 'deadline'],
+    general_announcement: ['guardian_name', 'announcement_title', 'announcement_content', 'mypage_url'],
+    schedule_change: ['guardian_name', 'application_number', 'old_date', 'new_date', 'venue_name', 'venue_address', 'change_reason', 'contact_email', 'response_deadline'],
+    result_announcement: ['guardian_name', 'application_number', 'mypage_url']
+};
+const commonVariables = ['website_url', 'mypage_url', 'original_recipient_email'];
+
+function parseRecipientType(value) {
+    if (!value) {
+        return ['guardian'];
+    }
+
+    let normalized = value.trim();
+    if (!normalized || normalized === 'custom') {
+        return ['guardian'];
+    }
+
+    const legacyMap = {
+        guardian_and_participant: ['guardian', 'participant'],
+        guardian_and_participant_and_team_members: ['guardian', 'participant', 'team_members'],
+        guardian_and_team_members: ['guardian', 'team_members'],
+        participant_and_team_members: ['participant', 'team_members'],
+        student: ['participant']
+    };
+
+    if (legacyMap[normalized]) {
+        return legacyMap[normalized];
+    }
+
+    normalized = normalized.replace(/_and_/g, ',');
+    const parts = normalized.split(',').map(part => part.trim()).filter(Boolean);
+
+    const tokens = [];
+    parts.forEach(part => {
+        const resolved = legacyMap[part] || [part];
+        resolved.forEach(token => {
+            if (!RECIPIENT_ORDER.includes(token)) {
+                return;
+            }
+            if (!tokens.includes(token)) {
+                tokens.push(token);
+            }
+        });
+    });
+
+    if (!tokens.length) {
+        return ['guardian'];
+    }
+
+    return tokens.sort((a, b) => RECIPIENT_ORDER.indexOf(a) - RECIPIENT_ORDER.indexOf(b));
+}
+
+function setRecipientSelection(value) {
+    const tokens = parseRecipientType(value);
+    RECIPIENT_ORDER.forEach(token => {
+        const checkbox = document.getElementById(recipientCheckboxIds[token]);
+        if (checkbox) {
+            checkbox.checked = tokens.includes(token);
+        }
+    });
+}
+
+function getRecipientSelectionValue() {
+    const selected = RECIPIENT_ORDER.filter(token => {
+        const checkbox = document.getElementById(recipientCheckboxIds[token]);
+        return checkbox ? checkbox.checked : false;
+    });
+
+    if (!selected.length) {
+        return null;
+    }
+
+    return selected.join('_and_');
+}
+
+function formatRecipientLabel(value) {
+    const tokens = parseRecipientType(value);
+    const labels = tokens.map(token => recipientLabelMap[token] || token);
+    return labels.join(' + ');
+}
+
+function updateVariableList(templateType) {
+    const wrapper = document.getElementById('variableList');
+    if (!wrapper) return;
+
+    const variables = [...commonVariables, ...(templateVariableMap[templateType] || [])];
+    if (!variables.length) {
+        wrapper.innerHTML = '<span class="text-gray-400">利用可能な変数情報はありません</span>';
+        return;
+    }
+
+    wrapper.innerHTML = variables.map(v => `
+        <code class="bg-white border px-2 py-1 rounded">${'{{' + v + '}}'}</code>
+    `).join('');
+}
 
 // テンプレート一覧読み込み
 async function loadTemplates() {
@@ -305,6 +456,9 @@ function renderTemplates() {
                                 <i class="ri-mail-line mr-1"></i>
                                 件名: <strong>${template.subject}</strong>
                             </p>
+                            <p class="text-xs text-gray-500 mb-1">
+                                宛先: <strong>${formatRecipientLabel(template.recipient_type)}</strong>
+                            </p>
                             <p class="text-xs text-gray-500">
                                 最終更新: ${dateStr}
                             </p>
@@ -344,6 +498,8 @@ async function openEditModal(templateId) {
         document.getElementById('editBodyText').value = template.body_text || '';
         document.getElementById('editBodyHtml').value = template.body_html || '';
         document.getElementById('editIsActive').checked = template.is_active;
+        updateVariableList(template.template_type);
+        setRecipientSelection(template.recipient_type);
         document.getElementById('modalTemplateName').textContent = template.template_name;
 
         // モーダル表示
@@ -423,6 +579,7 @@ async function saveTemplate() {
     const bodyText = document.getElementById('editBodyText').value.trim();
     const bodyHtml = document.getElementById('editBodyHtml').value.trim();
     const isActive = document.getElementById('editIsActive').checked;
+    const recipientType = getRecipientSelectionValue();
 
     if (!subject) {
         showMessage('件名を入力してください', 'error');
@@ -431,6 +588,11 @@ async function saveTemplate() {
 
     if (!bodyText) {
         showMessage('本文（テキスト版）を入力してください', 'error');
+        return;
+    }
+
+    if (!recipientType) {
+        showMessage('送信先を1つ以上選択してください', 'error');
         return;
     }
 
@@ -449,7 +611,8 @@ async function saveTemplate() {
                 subject: subject,
                 body_text: bodyText,
                 body_html: bodyHtml,
-                is_active: isActive
+                is_active: isActive,
+                recipient_type: recipientType
             })
         });
 

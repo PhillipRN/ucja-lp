@@ -16,7 +16,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="googlebot" content="noindex, nofollow">
     
-    <title>申込完了 - UNIV.Cambridge Japan Academy</title>
+    <title>申込完了 - UNIV.CAMBRIDGE JAPAN ACADEMY</title>
     
     <!-- Remix Icon CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css">
@@ -52,7 +52,7 @@
 
                 <div class="p-8">
                     <div class="text-center mb-8">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-4">英単語高校選手権 2026へのお申し込みありがとうございます</h2>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">UNIV.CAMBRIDGE JAPAN ACADEMY 英単語高校選手権へのお申し込みありがとうございます</h2>
                         <p class="text-gray-600 text-lg">
                             以下の情報でマイページにログインできます。<br>
                             大切に保管してください。

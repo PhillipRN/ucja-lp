@@ -31,6 +31,9 @@ class AuthHelper {
         $_SESSION['application_number'] = $applicationData['application_number'];
         $_SESSION['participation_type'] = $applicationData['participation_type'];
         $_SESSION['email'] = $applicationData['email'];
+        $_SESSION['team_member_id'] = $applicationData['team_member_id'] ?? null;
+        $_SESSION['is_guardian'] = $applicationData['is_guardian'] ?? false;
+        $_SESSION['is_representative'] = $applicationData['is_representative'] ?? false;
         $_SESSION['logged_in'] = true;
         $_SESSION['login_time'] = time();
         
@@ -155,8 +158,26 @@ class AuthHelper {
             'application_number' => self::getApplicationNumber(),
             'participation_type' => self::getParticipationType(),
             'email' => self::getUserEmail(),
+            'team_member_id' => self::getTeamMemberId(),
+            'is_guardian' => self::isGuardian(),
+            'is_representative' => self::isRepresentative(),
             'logged_in' => self::isLoggedIn()
         ];
+    }
+
+    public static function getTeamMemberId() {
+        self::startSession();
+        return $_SESSION['team_member_id'] ?? null;
+    }
+
+    public static function isGuardian() {
+        self::startSession();
+        return $_SESSION['is_guardian'] ?? false;
+    }
+
+    public static function isRepresentative() {
+        self::startSession();
+        return $_SESSION['is_representative'] ?? false;
     }
     
     /**

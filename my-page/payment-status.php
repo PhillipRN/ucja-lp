@@ -16,6 +16,7 @@ $userId = AuthHelper::getUserId();
 $applicationNumber = AuthHelper::getApplicationNumber();
 $participationType = AuthHelper::getParticipationType();
 $loginEmail = trim(strtolower(AuthHelper::getUserEmail() ?? ''));
+$teamMemberSessionId = AuthHelper::getTeamMemberId();
 
 // Supabaseから申込情報を取得
 $supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
@@ -437,5 +438,22 @@ $cardRegistered = $application['card_registered'] ?? false;
     </script>
 
 </body>
+<script>
+(function() {
+    try {
+        sessionStorage.setItem('application_id', '<?php echo $application['id'] ?? ''; ?>');
+        sessionStorage.setItem('application_number', '<?php echo $application['application_number'] ?? ''; ?>');
+        sessionStorage.setItem('amount', '<?php echo $application['amount'] ?? 0; ?>');
+        sessionStorage.setItem('participation_type', '<?php echo $application['participation_type'] ?? ''; ?>');
+        <?php if (!empty($teamMemberSessionId)): ?>
+        sessionStorage.setItem('team_member_id', '<?php echo $teamMemberSessionId; ?>');
+        <?php else: ?>
+        sessionStorage.removeItem('team_member_id');
+        <?php endif; ?>
+    } catch (error) {
+        console.warn('sessionStorageへの書き込みに失敗しました', error);
+    }
+})();
+</script>
 </html>
 

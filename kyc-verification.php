@@ -187,14 +187,18 @@
 
             // 本人確認完了APIを呼び出し（kyc_statusをcompletedに更新）
             // → トリガーが発動し、scheduled_chargesにレコードが挿入される
+            const teamMemberId = sessionStorage.getItem('team_member_id');
+            const payload = { application_id: applicationId };
+            if (teamMemberId) {
+                payload.team_member_id = teamMemberId;
+            }
+
             const response = await fetch('api/kyc/mark-as-completed.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    application_id: applicationId
-                })
+                body: JSON.stringify(payload)
             });
 
             const result = await response.json();

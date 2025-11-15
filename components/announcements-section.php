@@ -24,6 +24,10 @@ try {
     $announcements = [];
     error_log('Announcements fetch error: ' . $e->getMessage());
 }
+
+if (empty($announcements)) {
+    return;
+}
 ?>
 
 <section id="announcements" class="py-10 bg-gray-50">
@@ -35,74 +39,66 @@ try {
             </p>
         </div>
         
-        <?php if (empty($announcements)): ?>
-            <!-- お知らせがない場合 -->
-            <div class="bg-white rounded-xl shadow-md p-12 text-center">
-                <i class="ri-information-line text-3xl text-gray-400 mb-4"></i>
-                <p class="text-gray-500">現在、お知らせはありません</p>
-            </div>
-        <?php else: ?>
-            <!-- お知らせリスト（1つのカード内に表示） -->
-            <div class="max-w-4xl mx-auto">
-                <div class="bg-white rounded-xl shadow-md p-4 md:p-4">
-                    <div class="divide-y divide-gray-200">
-                        <?php foreach ($announcements as $index => $announcement): ?>
-                            <?php
-                            // 日付を「●月○日」形式に変換
-                            $date = new DateTime($announcement['announcement_date']);
-                            $month = (int)$date->format('n');
-                            $day = (int)$date->format('j');
-                            $formattedDate = $month . '月' . $day . '日';
-                            ?>
-                            
-                            <div class="py-4">
-                                <div class="flex items-start gap-1.5">
-                                    <!-- 日付バッジ -->
-                                    <div class="flex-shrink-0">
-                                        <div class="bg-blue-600 text-white rounded px-1.5 py-1 text-center">
-                                            <div class="text-xs font-medium leading-tight whitespace-nowrap"><?php echo htmlspecialchars($formattedDate); ?></div>
-                                        </div>
+        <!-- お知らせリスト（1つのカード内に表示） -->
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-md p-4 md:p-4">
+                <div class="divide-y divide-gray-200">
+                    <?php foreach ($announcements as $index => $announcement): ?>
+                        <?php
+                        // 日付を「●月○日」形式に変換
+                        $date = new DateTime($announcement['announcement_date']);
+                        $month = (int)$date->format('n');
+                        $day = (int)$date->format('j');
+                        $formattedDate = $month . '月' . $day . '日';
+                        ?>
+                        
+                        <div class="py-4">
+                            <div class="flex items-start gap-1.5">
+                                <!-- 日付バッジ -->
+                                <div class="flex-shrink-0">
+                                    <div class="bg-blue-600 text-white rounded px-1.5 py-1 text-center">
+                                    <div class="text-xs font-medium leading-tight whitespace-nowrap"><?php echo htmlspecialchars($formattedDate); ?></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- コンテンツ -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-gray-900 font-bold text-base md:text-lg mb-2">
+                                        <?php echo htmlspecialchars($announcement['title']); ?>
                                     </div>
                                     
-                                    <!-- コンテンツ -->
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-gray-900 font-bold text-base md:text-lg mb-2">
-                                            <?php echo htmlspecialchars($announcement['title']); ?>
-                                        </div>
+                                    <div class="text-gray-700 text-sm md:text-base mb-3">
+                                        <?php echo nl2br(htmlspecialchars($announcement['content'])); ?>
+                                    </div>
+                                    
+                                    <!-- リンク・PDF -->
+                                    <div class="flex flex-wrap gap-2 mt-3">
+                                        <?php if (!empty($announcement['external_url'])): ?>
+                                            <a href="<?php echo htmlspecialchars($announcement['external_url']); ?>" 
+                                               target="_blank" 
+                                               rel="noopener noreferrer"
+                                               class="inline-flex items-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md text-sm font-medium transition-colors">
+                                                <i class="ri-external-link-line mr-1.5 text-xs"></i>
+                                                詳細を見る
+                                            </a>
+                                        <?php endif; ?>
                                         
-                                        <div class="text-gray-700 text-sm md:text-base mb-3">
-                                            <?php echo nl2br(htmlspecialchars($announcement['content'])); ?>
-                                        </div>
-                                        
-                                        <!-- リンク・PDF -->
-                                        <div class="flex flex-wrap gap-2 mt-3">
-                                            <?php if (!empty($announcement['external_url'])): ?>
-                                                <a href="<?php echo htmlspecialchars($announcement['external_url']); ?>" 
-                                                   target="_blank" 
-                                                   rel="noopener noreferrer"
-                                                   class="inline-flex items-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md text-sm font-medium transition-colors">
-                                                    <i class="ri-external-link-line mr-1.5 text-xs"></i>
-                                                    詳細を見る
-                                                </a>
-                                            <?php endif; ?>
-                                            
-                                            <?php if (!empty($announcement['pdf_file_path'])): ?>
-                                                <a href="<?php echo htmlspecialchars($announcement['pdf_file_path']); ?>" 
-                                                   target="_blank"
-                                                   class="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors">
-                                                    <i class="ri-file-pdf-line mr-1.5 text-xs"></i>
-                                                    PDFを表示
-                                                </a>
-                                            <?php endif; ?>
-                                        </div>
+                                        <?php if (!empty($announcement['pdf_file_path'])): ?>
+                                            <a href="<?php echo htmlspecialchars($announcement['pdf_file_path']); ?>" 
+                                               target="_blank"
+                                               class="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors">
+                                                <i class="ri-file-pdf-line mr-1.5 text-xs"></i>
+                                                PDFを表示
+                                            </a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
-        <?php endif; ?>
+        </div>
     </div>
 </section>
 

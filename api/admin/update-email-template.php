@@ -29,6 +29,7 @@ try {
     $bodyText = $input['body_text'] ?? '';
     $bodyHtml = $input['body_html'] ?? '';
     $isActive = $input['is_active'] ?? true;
+    $recipientType = $input['recipient_type'] ?? 'guardian';
 
     if (empty($templateId)) {
         throw new Exception('テンプレートIDが指定されていません');
@@ -42,6 +43,11 @@ try {
         throw new Exception('本文（テキストまたはHTML）は必須です');
     }
 
+    $recipientType = trim($recipientType);
+    if ($recipientType === '') {
+        $recipientType = 'guardian';
+    }
+
     $supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
     // 管理者情報取得
@@ -53,6 +59,7 @@ try {
         'body_text' => $bodyText,
         'body_html' => $bodyHtml,
         'is_active' => $isActive,
+        'recipient_type' => $recipientType,
         'updated_at' => date('Y-m-d H:i:s'),
         'updated_by' => $admin['id']
     ];

@@ -198,6 +198,7 @@ require_once __DIR__ . '/config/config.php';
     const applicationNumber = sessionStorage.getItem('application_number');
     const amount = sessionStorage.getItem('amount');
     const participationType = sessionStorage.getItem('participation_type');
+    const teamMemberId = sessionStorage.getItem('team_member_id');
 
     // 申込情報が存在しない場合は申込フォームへリダイレクト
     if (!applicationId || !amount) {
@@ -268,13 +269,18 @@ require_once __DIR__ . '/config/config.php';
 
         try {
             // SetupIntent作成APIを呼び出す
+            const setupPayload = {
+                application_id: applicationId,
+                amount: amount
+            };
+            if (teamMemberId) {
+                setupPayload.team_member_id = teamMemberId;
+            }
+
             const response = await fetch('api/create-setup-intent.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    application_id: applicationId,
-                    amount: amount
-                })
+                body: JSON.stringify(setupPayload)
             });
 
             const data = await response.json();
@@ -299,14 +305,19 @@ require_once __DIR__ . '/config/config.php';
             console.log('SetupIntent Success:', setupIntent);
             
             // PaymentMethod IDをサーバーに保存
+            const savePayload = {
+                application_id: applicationId,
+                payment_method_id: setupIntent.payment_method,
+                setup_intent_id: setupIntent.id
+            };
+            if (teamMemberId) {
+                savePayload.team_member_id = teamMemberId;
+            }
+
             const saveResponse = await fetch('api/save-payment-method.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    application_id: applicationId,
-                    payment_method_id: setupIntent.payment_method,
-                    setup_intent_id: setupIntent.id
-                })
+                body: JSON.stringify(savePayload)
             });
 
             const saveData = await saveResponse.json();

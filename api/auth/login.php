@@ -76,7 +76,9 @@ try {
             'participation_type' => 'individual',
             'email' => $email,
             'student_name' => $individual['student_name'],
-            'school' => $individual['school']
+            'school' => $individual['school'],
+            'is_guardian' => ($guardianEmail === $email),
+            'team_member_id' => null
         ];
         
     } else {
@@ -135,7 +137,10 @@ try {
             'email' => $email,
             'team_name' => $team['team_name'],
             'school' => $team['school'],
-            'is_representative' => $isGuardian
+            'is_representative' => $isGuardian,
+            'is_guardian' => $isGuardian,
+            'team_member_id' => $memberData['id'] ?? null,
+            'team_member_name' => $memberData['member_name'] ?? null
         ];
     }
     

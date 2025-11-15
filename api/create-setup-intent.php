@@ -34,20 +34,49 @@ try {
     }
     
     $application = $applicationResult['data'];
+    $teamMemberId = $input['team_member_id'] ?? null;
+    $teamMember = null;
+    $teamApplication = null;
     
-    // 既にSetupIntent IDが存在する場合は再利用
-    if (!empty($application['stripe_setup_intent_id'])) {
-        $setupIntent = \Stripe\SetupIntent::retrieve($application['stripe_setup_intent_id']);
-        
-        // 既に成功している場合は新規作成
-        if ($setupIntent->status === 'succeeded') {
-            // 新しいSetupIntentを作成
-        } else {
-            // 既存のSetupIntentを返す
+    if (!empty($teamMemberId)) {
+        if ($application['participation_type'] !== 'team') {
+            throw new Exception('メンバー情報はチーム戦でのみ指定できます');
+        }
+
+        $memberResult = $supabase->from('team_members')
+            ->select('*')
+            ->eq('id', $teamMemberId)
+            ->single();
+
+        if (!$memberResult['success'] || empty($memberResult['data'])) {
+            throw new Exception('チームメンバーが見つかりません');
+        }
+        $teamMember = $memberResult['data'];
+
+        $teamResult = $supabase->from('team_applications')
+            ->select('*')
+            ->eq('id', $teamMember['team_application_id'])
+            ->single();
+
+        if (!$teamResult['success'] || empty($teamResult['data'])) {
+            throw new Exception('チーム情報が見つかりません');
+        }
+        $teamApplication = $teamResult['data'];
+
+        if ($teamApplication['application_id'] !== $applicationId) {
+            throw new Exception('申込に紐づくメンバーではありません');
+        }
+    }
+
+    $existingSetupIntentId = $teamMember ? ($teamMember['stripe_setup_intent_id'] ?? null) : ($application['stripe_setup_intent_id'] ?? null);
+
+    if (!empty($existingSetupIntentId)) {
+        $existingSetupIntent = \Stripe\SetupIntent::retrieve($existingSetupIntentId);
+        if ($existingSetupIntent->status !== 'succeeded') {
             echo json_encode([
                 'success' => true,
-                'clientSecret' => $setupIntent->client_secret,
-                'setupIntentId' => $setupIntent->id,
+                'clientSecret' => $existingSetupIntent->client_secret,
+                'setupIntentId' => $existingSetupIntent->id,
                 'application_number' => $application['application_number']
             ]);
             exit;
@@ -59,7 +88,16 @@ try {
     $customerName = '';
     $description = '';
     
-    if ($application['participation_type'] === 'individual') {
+    if ($teamMember) {
+        $customerEmail = $teamMember['member_email'];
+        $customerName = $teamMember['member_name'];
+        $description = sprintf(
+            'Cambridge Exam カード登録（チーム戦メンバー%d） - 申込番号: %s - メンバー: %s',
+            $teamMember['member_number'],
+            $application['application_number'],
+            $teamMember['member_name']
+        );
+    } elseif ($application['participation_type'] === 'individual') {
         $individualResult = $supabase->from('individual_applications')
             ->select('*')
             ->eq('application_id', $applicationId)
@@ -94,10 +132,9 @@ try {
     }
     
     // Stripe Customerを作成（または既存のものを使用）
-    $stripeCustomerId = $application['stripe_customer_id'];
+    $stripeCustomerId = $teamMember ? ($teamMember['stripe_customer_id'] ?? null) : ($application['stripe_customer_id'] ?? null);
     
     if (empty($stripeCustomerId)) {
-        // 新規Customer作成
         $customer = \Stripe\Customer::create([
             'email' => $customerEmail,
             'name' => $customerName,
@@ -105,24 +142,31 @@ try {
             'metadata' => [
                 'application_id' => $applicationId,
                 'application_number' => $application['application_number'],
-                'participation_type' => $application['participation_type']
+                'participation_type' => $application['participation_type'],
+                'team_member_id' => $teamMemberId
             ]
         ]);
         $stripeCustomerId = $customer->id;
-        
-        // Customer IDをDBに保存
-        $supabase->update('applications', [
-            'stripe_customer_id' => $stripeCustomerId
-        ], [
-            'id' => 'eq.' . $applicationId
-        ]);
+
+        if ($teamMember) {
+            $supabase->update('team_members', [
+                'stripe_customer_id' => $stripeCustomerId
+            ], [
+                'id' => 'eq.' . $teamMemberId
+            ]);
+        } else {
+            $supabase->update('applications', [
+                'stripe_customer_id' => $stripeCustomerId
+            ], [
+                'id' => 'eq.' . $applicationId
+            ]);
+        }
     }
     
-    // Stripe Setup Intent を作成（Customerに紐付け）
     $setupIntent = \Stripe\SetupIntent::create([
         'payment_method_types' => ['card'],
         'usage' => 'off_session', // 後日課金用
-        'customer' => $stripeCustomerId, // 重要！Customerに紐付け
+        'customer' => $stripeCustomerId,
         'description' => $description,
         'metadata' => [
             'application_id' => $applicationId,
@@ -130,17 +174,26 @@ try {
             'participation_type' => $application['participation_type'],
             'customer_name' => $customerName,
             'customer_email' => $customerEmail,
-            'amount' => $application['amount'] // 参考情報として保存
+            'amount' => $application['amount'],
+            'team_member_id' => $teamMemberId
         ]
     ]);
     
-    // Setup Intent IDをデータベースに保存
-    $supabase->update('applications', [
-        'stripe_setup_intent_id' => $setupIntent->id,
-        'application_status' => 'card_pending'
-    ], [
-        'id' => 'eq.' . $applicationId
-    ]);
+    if ($teamMember) {
+        $supabase->update('team_members', [
+            'stripe_setup_intent_id' => $setupIntent->id,
+            'updated_at' => date('Y-m-d H:i:s')
+        ], [
+            'id' => 'eq.' . $teamMemberId
+        ]);
+    } else {
+        $supabase->update('applications', [
+            'stripe_setup_intent_id' => $setupIntent->id,
+            'application_status' => 'card_pending'
+        ], [
+            'id' => 'eq.' . $applicationId
+        ]);
+    }
     
     // クライアントシークレットを返す
     echo json_encode([

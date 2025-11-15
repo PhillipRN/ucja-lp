@@ -107,9 +107,14 @@ Cambridge Exam 事務局
 </html>',
     FALSE, -- use_sendgrid_template
     'application_flow', -- category
-    3, -- sort_order
+    7, -- sort_order
     TRUE -- is_active
 );
+
+-- 送信先設定
+UPDATE email_templates
+SET recipient_type = 'team_members'
+WHERE template_type = 'team_member_payment';
 
 -- 7. 本人確認完了通知
 INSERT INTO email_templates (

@@ -25,10 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // 設定とライブラリの読み込み
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../lib/SupabaseClient.php';
+require_once __DIR__ . '/../lib/EmailTemplateService.php';
 
 try {
     // Supabaseクライアントの初期化
     $supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    $emailTemplateService = new EmailTemplateService($supabase);
     
     // POSTデータの取得
     $participationType = $_POST['participationType'] ?? '';
@@ -110,6 +112,7 @@ try {
             throw new Exception('生徒情報の登録に失敗しました');
         }
         
+        $guardianEmail = $individualData['guardian_email'];
         $responseData = [
             'success' => true,
             'application_id' => $applicationId,
@@ -119,6 +122,9 @@ try {
             'student_email' => $individualData['student_email'],
             'guardian_email' => $individualData['guardian_email']
         ];
+        $participantName = $individualData['student_name'];
+        $guardianName = $individualData['guardian_name'];
+        $teamName = '';
         
     } else {
         // チーム戦の処理
@@ -174,6 +180,7 @@ try {
             $memberEmails[] = $memberEmail;
         }
         
+        $guardianEmail = $teamData['guardian_email'];
         $responseData = [
             'success' => true,
             'application_id' => $applicationId,
@@ -184,20 +191,33 @@ try {
             'member_emails' => $memberEmails,
             'guardian_email' => $teamData['guardian_email']
         ];
+        $participantName = $teamData['team_name'];
+        $guardianName = $teamData['guardian_name'];
+        $teamName = $teamData['team_name'];
     }
     
-    // 3. メール送信ログの記録（実際のメール送信は別途実装）
-    $emailLogData = [
-        'application_id' => $applicationId,
-        'email_type' => 'application_confirmation',
-        'recipient_email' => $participationType === '個人戦' 
-            ? $individualData['guardian_email'] 
-            : $teamData['guardian_email'],
-        'subject' => '【Cambridge Exam】申込受付のお知らせ',
-        'status' => 'pending'
-    ];
-    
-    $supabase->insert('email_logs', $emailLogData);
+    // 3. メール送信
+    try {
+        $emailVariables = [
+            'guardian_name' => $guardianName,
+            'participant_name' => $participantName,
+            'team_name' => $teamName,
+            'application_number' => $applicationNumber,
+            'participation_type' => $participationType,
+            'amount' => number_format($amount),
+            'card_registration_url' => rtrim(APP_URL, '/') . '/stripe-checkout-setup.php',
+            'email' => $guardianEmail
+        ];
+        
+        $emailTemplateService->sendTemplateToApplication(
+            'application_confirmation',
+            $applicationId,
+            $emailVariables,
+            []
+        );
+    } catch (Exception $mailException) {
+        error_log('[submit-application] メール送信に失敗しました: ' . $mailException->getMessage());
+    }
     
     // 成功レスポンス
     http_response_code(201);

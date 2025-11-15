@@ -34,6 +34,9 @@ define('APP_ENV', 'development'); // development, production
 define('SENDGRID_API_KEY', 'SG.your-sendgrid-api-key-here');
 define('SENDGRID_FROM_EMAIL', 'noreply@univ-cambridge-japan.academy');
 define('SENDGRID_FROM_NAME', 'UCJA事務局');
+define('EMAIL_SANDBOX_MODE', true); // 開発・検証時は true、本番は false
+define('EMAIL_SANDBOX_RECIPIENT', 'dev-team@example.com'); // サンドボックス送信先
+define('EMAIL_AUTO_GENERATE_HTML_FROM_TEXT', true); // テキスト版からHTMLを自動生成
 
 // SendGrid Dynamic Templates ID
 define('TEMPLATE_APPLICATION_COMPLETE', 'd-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'); // 申込完了
