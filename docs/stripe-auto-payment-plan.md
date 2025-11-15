@@ -26,7 +26,9 @@
 - チーム代表への集計用フラグ（`team_applications.all_members_paid` 等）は既存トリガーで更新される前提。
 
 ### B. 課金実行ジョブ
-- CLI/cron想定のPHPスクリプト（例: `scripts/run-scheduled-charges.php`）を新設。
+- CLI/cron想定のPHPスクリプト `scripts/run-scheduled-charges.php` を新設。
+    - `php scripts/run-scheduled-charges.php --dry-run` でStripe APIを呼ばずに挙動確認。
+    - `--date=YYYY-MM-DD` や `--limit=10` で処理対象や件数を制御可能。
     - 未処理の `scheduled_charges` を取得。
     - Stripe PaymentIntentを `amount` / `customer` / `payment_method` / `off_session` で作成し `confirm`。
     - 成否に応じて `scheduled_charges.status`・`team_members.payment_status`・`payment_transactions` を更新。
