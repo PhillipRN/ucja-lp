@@ -28,6 +28,7 @@ try {
     // ユーザー情報取得
     $userId = AuthHelper::getUserId();
     $participationType = AuthHelper::getParticipationType();
+    $teamMemberId = AuthHelper::getTeamMemberId();
     
     // Supabaseクライアント初期化
     $supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
@@ -59,7 +60,9 @@ try {
         'stripe_payment_method_id' => $application['stripe_payment_method_id'] ?? null
     ];
     
-    // チーム戦の場合はメンバーの支払い状況も取得
+    $teamData = null;
+
+    // チーム戦の場合はチーム情報取得
     if ($participationType === 'team') {
         // チーム申込情報取得
         $teamResult = $supabase->from('team_applications')
@@ -68,8 +71,8 @@ try {
             ->single();
         
         if ($teamResult['success'] && !empty($teamResult['data'])) {
-            $team = $teamResult['data'];
-            $teamApplicationId = $team['id'];
+            $teamData = $teamResult['data'];
+            $teamApplicationId = $teamData['id'];
             
             // チームメンバーの支払い状況取得
             $membersResult = $supabase->from('team_members')
@@ -95,7 +98,7 @@ try {
             }
             
             $paymentData['team'] = [
-                'team_name' => $team['team_name'],
+                'team_name' => $teamData['team_name'],
                 'total_members' => $totalMembers,
                 'paid_members' => $paidMembers,
                 'card_registered_members' => $cardRegisteredMembers,
@@ -104,6 +107,40 @@ try {
                 'members' => $members
             ];
         }
+    }
+
+    // ログイン中のチームメンバー情報（個別ビュー向け）
+    if ($teamMemberId && $teamData) {
+        $memberResult = $supabase->from('team_members')
+            ->select('*')
+            ->eq('id', $teamMemberId)
+            ->single();
+
+        if ($memberResult['success'] && !empty($memberResult['data'])) {
+            $member = $memberResult['data'];
+
+            // 念のため、紐づく申込が一致するか確認
+            if ($member['team_application_id'] === $teamData['id']) {
+                $paymentData['member_payment'] = [
+                    'member_id' => $member['id'],
+                    'member_name' => $member['member_name'],
+                    'member_number' => $member['member_number'],
+                    'payment_status' => $member['payment_status'],
+                    'card_registered' => $member['card_registered'],
+                    'card_registered_at' => $member['card_registered_at'],
+                    'card_last4' => $member['card_last4'],
+                    'card_brand' => $member['card_brand'],
+                    'kyc_status' => $member['kyc_status'],
+                    'scheduled_charge_date' => $member['scheduled_charge_date'],
+                    'charged_at' => $member['charged_at'],
+                    'stripe_payment_method_id' => $member['stripe_payment_method_id'],
+                    'stripe_payment_intent_id' => $member['stripe_payment_intent_id'],
+                    'is_representative' => (bool)($member['is_representative'] ?? false)
+                ];
+            }
+        }
+    } else {
+        $paymentData['member_payment'] = null;
     }
     
     // 成功レスポンス

@@ -468,6 +468,20 @@ try {
         }
     });
 
+    function formatDateTime(value) {
+        if (!value) return '';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            return value;
+        }
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        return `${yyyy}年${mm}月${dd}日 ${hh}:${min}`;
+    }
+
     function displayTeamData(data) {
         const { team, members, stats, team_score } = data;
         
@@ -543,6 +557,14 @@ try {
         // ステータスバッジ
         const paymentBadge = getPaymentBadge(member.payment_status);
         const kycBadge = getKycBadge(member.kyc_status);
+        const paymentMeta = [];
+        if (member.card_registered_at) {
+            paymentMeta.push(`カード登録: ${formatDateTime(member.card_registered_at)}`);
+        }
+        if (member.charged_at) {
+            paymentMeta.push(`決済: ${formatDateTime(member.charged_at)}`);
+        }
+        const paymentMetaHtml = paymentMeta.length ? `<div class="text-xs text-gray-500 mt-2">${paymentMeta.join('<br>')}</div>` : '';
         
         // 試験結果
         let examResultHtml = '';
@@ -621,6 +643,7 @@ try {
                     ${kycBadge}
                 </div>
             </div>
+            ${paymentMetaHtml}
             
             ${examResultHtml}
         `;
@@ -631,8 +654,11 @@ try {
     function getPaymentBadge(status) {
         const badges = {
             'pending': '<span class="inline-flex items-center bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="ri-time-line mr-1"></i>未払い</span>',
+            'card_registered': '<span class="inline-flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="ri-bank-card-line mr-1"></i>カード登録済</span>',
+            'processing': '<span class="inline-flex items-center bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="ri-loader-4-line mr-1"></i>処理中</span>',
             'completed': '<span class="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="ri-check-line mr-1"></i>完了</span>',
-            'failed': '<span class="inline-flex items-center bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="ri-close-line mr-1"></i>失敗</span>'
+            'failed': '<span class="inline-flex items-center bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="ri-close-line mr-1"></i>失敗</span>',
+            'refunded': '<span class="inline-flex items-center bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold"><i class="ri-restart-line mr-1"></i>返金済</span>'
         };
         return badges[status] || badges['pending'];
     }

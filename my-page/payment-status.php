@@ -8,6 +8,17 @@ require_once __DIR__ . '/../lib/AuthHelper.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../lib/SupabaseClient.php';
 
+function formatDateTimeLabel(?string $value): ?string {
+    if (empty($value)) {
+        return null;
+    }
+    $timestamp = strtotime($value);
+    if (!$timestamp) {
+        return null;
+    }
+    return date('Y年m月d日 H:i', $timestamp);
+}
+
 // ログインチェック
 AuthHelper::requireLogin();
 
@@ -23,6 +34,8 @@ $supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 // 保護者かどうかを判定する変数
 $isGuardian = false;
+$teamApplicationRecord = null;
+$teamMemberData = null;
 
 try {
     // 申込情報取得
@@ -50,16 +63,31 @@ try {
         }
     } else {
         $detailResult = $supabase->from('team_applications')
-            ->select('guardian_email')
+            ->select('id, guardian_email, team_name')
             ->eq('application_id', $userId)
             ->single();
         
         if ($detailResult['success'] && !empty($detailResult['data'])) {
-            $guardianEmail = trim(strtolower($detailResult['data']['guardian_email'] ?? ''));
+            $teamApplicationRecord = $detailResult['data'];
+            $guardianEmail = trim(strtolower($teamApplicationRecord['guardian_email'] ?? ''));
             $isGuardian = ($loginEmail === $guardianEmail);
         }
     }
     
+    if ($teamMemberSessionId && $participationType === 'team' && !empty($teamApplicationRecord)) {
+        $memberResult = $supabase->from('team_members')
+            ->select('*')
+            ->eq('id', $teamMemberSessionId)
+            ->single();
+
+        if ($memberResult['success'] && !empty($memberResult['data'])) {
+            $member = $memberResult['data'];
+            if (($member['team_application_id'] ?? null) === ($teamApplicationRecord['id'] ?? null)) {
+                $teamMemberData = $member;
+            }
+        }
+    }
+
 } catch (Exception $e) {
     $error = $e->getMessage();
     $application = [];
@@ -68,6 +96,29 @@ try {
 // 支払いステータスに応じた表示
 $paymentStatus = $application['payment_status'] ?? 'pending';
 $cardRegistered = $application['card_registered'] ?? false;
+$kycStatus = $application['kyc_status'] ?? 'pending';
+$isKycCompleted = in_array($kycStatus, ['approved', 'completed'], true);
+$applicationChargedAtLabel = formatDateTimeLabel($application['charged_at'] ?? null);
+$applicationCardRegisteredAtLabel = formatDateTimeLabel($application['card_registered_at'] ?? null);
+$supportEmail = 'contact@univ-cambridge-japan.academy';
+
+$kycStatusLabels = [
+    'pending' => '未実施',
+    'in_progress' => '確認中',
+    'completed' => '完了',
+    'approved' => '完了',
+    'failed' => '失敗',
+    'rejected' => '却下'
+];
+$kycStatusLabel = $kycStatusLabels[$kycStatus] ?? '未実施';
+
+$isTeamMemberView = ($participationType === 'team' && !empty($teamMemberData));
+$memberPaymentStatus = $isTeamMemberView ? ($teamMemberData['payment_status'] ?? 'pending') : null;
+$memberCardRegistered = $isTeamMemberView ? (bool)($teamMemberData['card_registered'] ?? false) : false;
+$memberKycStatus = $isTeamMemberView ? ($teamMemberData['kyc_status'] ?? 'pending') : 'pending';
+$memberKycLabel = $kycStatusLabels[$memberKycStatus] ?? '未実施';
+$memberChargedAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemberData['charged_at'] ?? null) : null;
+$memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemberData['card_registered_at'] ?? null) : null;
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -207,6 +258,125 @@ $cardRegistered = $application['card_registered'] ?? false;
                     <p class="text-gray-600">参加費のお支払い状況を確認できます</p>
                 </div>
 
+                <?php if ($isTeamMemberView && $teamMemberData): ?>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+                        <h3 class="text-xl font-bold text-white flex items-center">
+                            <i class="ri-user-star-line mr-2"></i>
+                            あなた（メンバー<?php echo htmlspecialchars($teamMemberData['member_number']); ?>）の支払い状況
+                        </h3>
+                        <p class="text-indigo-100 text-sm mt-1">
+                            <?php echo htmlspecialchars($teamMemberData['member_name'] ?? ''); ?> / <?php echo htmlspecialchars($teamApplicationRecord['team_name'] ?? ''); ?>
+                        </p>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <?php if ($memberPaymentStatus === 'completed'): ?>
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-5">
+                            <div class="flex items-center mb-2 text-green-700">
+                                <i class="ri-check-line text-2xl mr-3"></i>
+                                <div>
+                                    <div class="text-lg font-bold">決済が完了しました</div>
+                                    <?php if ($memberChargedAtLabel): ?>
+                                    <div class="text-sm text-green-800 mt-1">決済日時: <?php echo $memberChargedAtLabel; ?></div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <p class="text-sm text-green-900">
+                                このまま試験本番までご案内メールをお待ちください。
+                            </p>
+                        </div>
+                        <?php elseif ($memberPaymentStatus === 'failed'): ?>
+                        <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+                            <div class="flex items-center mb-3 text-red-700">
+                                <i class="ri-error-warning-line text-2xl mr-3"></i>
+                                <div>
+                                    <div class="text-lg font-bold">決済に失敗しました</div>
+                                    <p class="text-sm text-red-800 mt-1">カード情報を再登録のうえ、別のカードでお試しください。</p>
+                                </div>
+                            </div>
+                            <a
+                                href="../stripe-checkout-setup.php"
+                                class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
+                            >
+                                <i class="ri-refresh-line mr-2"></i>
+                                カード情報を再登録する
+                            </a>
+                            <p class="text-xs text-red-800 mt-3">
+                                <i class="ri-mail-line mr-1"></i>
+                                解決しない場合は <?php echo htmlspecialchars($supportEmail); ?> までお問い合わせください。
+                            </p>
+                        </div>
+                        <?php elseif ($memberPaymentStatus === 'processing'): ?>
+                        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-5">
+                            <div class="flex items-center mb-2 text-indigo-700">
+                                <i class="ri-time-line text-2xl mr-3"></i>
+                                <div>
+                                    <div class="text-lg font-bold">決済処理中です</div>
+                                    <p class="text-sm text-indigo-900 mt-1">数分後に自動で反映されます。しばらくお待ちください。</p>
+                                </div>
+                            </div>
+                        </div>
+                        <?php elseif ($memberCardRegistered): ?>
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+                            <div class="flex items-center mb-2 text-blue-700">
+                                <i class="ri-information-line text-2xl mr-3"></i>
+                                <div>
+                                    <div class="text-lg font-bold">カード登録済み</div>
+                                    <p class="text-sm text-blue-900 mt-1">本人確認が完了すると自動的に決済されます。</p>
+                                </div>
+                            </div>
+                            <?php if ($memberCardRegisteredAtLabel): ?>
+                            <p class="text-sm text-blue-800">登録日時: <?php echo $memberCardRegisteredAtLabel; ?></p>
+                            <?php endif; ?>
+                        </div>
+                        <?php else: ?>
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-5">
+                            <div class="flex items-center mb-3 text-yellow-700">
+                                <i class="ri-bank-card-line text-2xl mr-3"></i>
+                                <div>
+                                    <div class="text-lg font-bold">カード登録が必要です</div>
+                                    <p class="text-sm text-yellow-900 mt-1">以下のボタンからカード情報を登録してください。</p>
+                                </div>
+                            </div>
+                            <a
+                                href="../stripe-checkout-setup.php"
+                                class="inline-flex items-center bg-gradient-blue-teal text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl"
+                            >
+                                <i class="ri-bank-card-line mr-2"></i>
+                                カード情報を登録する
+                            </a>
+                            <?php if (!in_array($memberKycStatus, ['approved', 'completed'], true)): ?>
+                            <div class="bg-white border border-yellow-200 rounded-lg p-4 mt-4 text-sm text-yellow-800">
+                                <i class="ri-shield-check-line mr-2"></i>
+                                本人確認（eKYC）も忘れずに完了させてください。
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <div class="text-xs text-gray-500 mb-1">本人確認ステータス</div>
+                                <div class="text-base font-semibold text-gray-900"><?php echo htmlspecialchars($memberKycLabel); ?></div>
+                            </div>
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <div class="text-xs text-gray-500 mb-1">登録カード</div>
+                                <?php if (!empty($teamMemberData['card_last4']) && !empty($teamMemberData['card_brand'])): ?>
+                                    <div class="text-sm font-semibold text-gray-900">
+                                        <?php echo htmlspecialchars($teamMemberData['card_brand']); ?> •••• <?php echo htmlspecialchars($teamMemberData['card_last4']); ?>
+                                    </div>
+                                    <?php if ($memberCardRegisteredAtLabel): ?>
+                                    <div class="text-xs text-gray-500 mt-1">登録日: <?php echo $memberCardRegisteredAtLabel; ?></div>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <div class="text-sm text-gray-500">未登録</div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <!-- 支払いステータスカード -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
@@ -224,9 +394,38 @@ $cardRegistered = $application['card_registered'] ?? false;
                             </div>
                             <h4 class="text-2xl font-bold text-gray-900 mb-2">支払い完了</h4>
                             <p class="text-gray-700">参加費のお支払いが完了しています</p>
-                            <?php if (!empty($application['charged_at'])): ?>
-                            <p class="text-sm text-gray-600 mt-2">決済日時: <?php echo date('Y年m月d日 H:i', strtotime($application['charged_at'])); ?></p>
+                            <?php if ($applicationChargedAtLabel): ?>
+                            <p class="text-sm text-gray-600 mt-2">決済日時: <?php echo $applicationChargedAtLabel; ?></p>
                             <?php endif; ?>
+                        </div>
+
+                        <?php elseif ($paymentStatus === 'failed'): ?>
+                        <div class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="ri-close-line text-red-600 text-4xl"></i>
+                            </div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">決済に失敗しました</h4>
+                            <p class="text-gray-700 mb-4">カード情報を再登録し、別のカードでお試しください。</p>
+                            <a
+                                href="../stripe-checkout-setup.php"
+                                class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
+                            >
+                                <i class="ri-refresh-line mr-2"></i>
+                                カード情報を再登録する
+                            </a>
+                            <p class="text-sm text-red-700 mt-4">
+                                <i class="ri-mail-line mr-1"></i>
+                                解決しない場合は <?php echo htmlspecialchars($supportEmail); ?> までご連絡ください。
+                            </p>
+                        </div>
+
+                        <?php elseif ($paymentStatus === 'processing'): ?>
+                        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 text-center">
+                            <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="ri-loader-4-line text-indigo-600 text-4xl animate-spin"></i>
+                            </div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">決済処理中です</h4>
+                            <p class="text-gray-700">数分後にステータスが更新されます。反映までしばらくお待ちください。</p>
                         </div>
 
                         <?php elseif ($cardRegistered): ?>
@@ -243,6 +442,9 @@ $cardRegistered = $application['card_registered'] ?? false;
                                 <div class="font-semibold text-gray-900">
                                     <?php echo htmlspecialchars($application['card_brand']); ?> •••• <?php echo htmlspecialchars($application['card_last4']); ?>
                                 </div>
+                                <?php if ($applicationCardRegisteredAtLabel): ?>
+                                <div class="text-xs text-gray-500 mt-1">登録日: <?php echo $applicationCardRegisteredAtLabel; ?></div>
+                                <?php endif; ?>
                             </div>
                             <?php endif; ?>
                         </div>
@@ -250,20 +452,13 @@ $cardRegistered = $application['card_registered'] ?? false;
                         <?php else: ?>
                         <!-- 未払い -->
                         <?php
-                        // KYCステータスを確認
-                        $kycStatus = $application['kyc_status'] ?? 'pending';
-                        $isKycCompleted = ($kycStatus === 'approved' || $kycStatus === 'completed');
-                        
-                        // KYC完了状況に応じて、遷移先とボタン文言を変更
                         if ($isKycCompleted) {
-                            // KYC完了済み → 即時決済
                             $checkoutUrl = '../stripe-checkout-payment.php';
                             $buttonText = '今すぐ支払う';
                             $buttonIcon = 'ri-flashlight-line';
                             $description = '参加費をお支払いいただくと、すぐに受験資格が確定します';
                             $noteText = '決済は即座に実行されます';
                         } else {
-                            // KYC未完了 → カード登録（後日課金）
                             $checkoutUrl = '../stripe-checkout-setup.php';
                             $buttonText = 'カード情報を登録する';
                             $buttonIcon = 'ri-bank-card-line';
@@ -271,7 +466,7 @@ $cardRegistered = $application['card_registered'] ?? false;
                             $noteText = '本人確認完了後に自動的に決済されます';
                         }
                         ?>
-                        
+
                         <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
                             <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <i class="ri-alert-line text-yellow-600 text-4xl"></i>

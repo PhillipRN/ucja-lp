@@ -23,6 +23,7 @@
 | `card_registration_completed`<br>カード登録完了   | `guardian_name`, `application_number`, `mypage_url`                                                                                                 |
 | `kyc_required`<br>本人確認依頼                    | `guardian_name`, `application_number`, `mypage_url`                                                                                                 |
 | `payment_confirmation`<br>決済完了通知            | `guardian_name`, `application_number`, `participant_name`, `amount`, `payment_date`, `exam_date`, `mypage_url`                                      |
+| `payment_failed`<br>決済エラー通知               | `guardian_name`, `participant_name`, `application_number`, `amount`, `error_message`, `support_email`, `mypage_url`                                  |
 | `exam_reminder`<br>試験日リマインダー             | `guardian_name`, `application_number`, `exam_date`, `meeting_time`, `venue_name`, `venue_address`, `emergency_contact`, `map_url`, `mypage_url`     |
 | `team_member_payment`<br>チームメンバー支払い依頼 | `member_name`, `team_name`, `representative_name`, `amount`, `application_number`, `payment_link`, `deadline`                                       |
 | `kyc_completed`<br>本人確認完了通知               | `guardian_name`, `application_number`, `amount`                                                                                                     |

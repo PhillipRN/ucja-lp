@@ -126,6 +126,8 @@ function processCharge(array $charge, SupabaseClient $supabase, EmailTemplateSer
 
     lockCharge($supabase, $chargeId);
 
+    $context = null;
+
     try {
         $context = buildChargeContext($supabase, $charge);
         $paymentIntent = createPaymentIntent($supabase, $charge, $context);
@@ -145,6 +147,11 @@ function processCharge(array $charge, SupabaseClient $supabase, EmailTemplateSer
         sendPaymentConfirmationEmail($emailTemplateService, $charge, $context);
     } catch (Exception $e) {
         markProcessingChargeAsFailed($supabase, $charge, 'internal_error', $e->getMessage());
+
+        if (!$dryRun && $context) {
+            sendPaymentFailureEmail($emailTemplateService, $charge, $context, $e->getMessage());
+        }
+
         throw $e;
     }
 }
@@ -482,6 +489,41 @@ function sendPaymentConfirmationEmail(EmailTemplateService $service, array $char
         $service->sendTemplateToApplication('payment_confirmation', $application['id'], $variables, $options);
     } catch (Exception $e) {
         error_log('[run-scheduled-charges] payment_confirmation送信に失敗: ' . $e->getMessage());
+    }
+}
+
+/**
+ * 決済失敗メール
+ */
+function sendPaymentFailureEmail(EmailTemplateService $service, array $charge, array $context, string $errorMessage): void
+{
+    if (empty($context['application']['id'])) {
+        return;
+    }
+
+    $application = $context['application'];
+    $teamMember = $context['team_member'] ?? null;
+    $supportEmail = 'contact@univ-cambridge-japan.academy';
+
+    $variables = [
+        'guardian_name' => $context['guardian_name'],
+        'participant_name' => $context['participant_name'],
+        'application_number' => $application['application_number'] ?? '',
+        'amount' => number_format((int)($charge['amount'] ?? 0)),
+        'error_message' => $errorMessage ?: 'カード会社でエラーが発生しました。別のカードをお試しください。',
+        'support_email' => $supportEmail
+    ];
+
+    $options = [
+        'recipient_options' => array_filter([
+            'team_member_id' => $teamMember['id'] ?? null
+        ])
+    ];
+
+    try {
+        $service->sendTemplateToApplication('payment_failed', $application['id'], $variables, $options);
+    } catch (Exception $e) {
+        error_log('[run-scheduled-charges] payment_failed送信に失敗: ' . $e->getMessage());
     }
 }
 
