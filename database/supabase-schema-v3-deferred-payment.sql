@@ -41,8 +41,11 @@ CREATE TABLE users (
 -- =============================================
 CREATE TABLE applications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    application_number VARCHAR(50) UNIQUE NOT NULL, -- 申込番号（例：APP-2025-00001）
+    application_number VARCHAR(50) UNIQUE NOT NULL, -- 申込番号（例：UCJA-2025-01-000001）
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    
+    -- 環境情報
+    environment VARCHAR(20) DEFAULT 'development',
     
     -- 参加形式
     participation_type VARCHAR(20) NOT NULL CHECK (participation_type IN ('individual', 'team')),
@@ -599,20 +602,29 @@ CREATE OR REPLACE FUNCTION generate_application_number()
 RETURNS TRIGGER AS $$
 DECLARE
     year_str VARCHAR(4);
+    month_str VARCHAR(2);
     seq_num INTEGER;
+    prefix VARCHAR(10);
     new_number VARCHAR(50);
 BEGIN
     year_str := TO_CHAR(CURRENT_DATE, 'YYYY');
+    month_str := TO_CHAR(CURRENT_DATE, 'MM');
+    
+    IF COALESCE(NEW.environment, 'development') = 'production' THEN
+        prefix := 'UCJA';
+    ELSE
+        prefix := 'DEV';
+    END IF;
     
     SELECT COALESCE(MAX(
         CAST(
-            SUBSTRING(application_number FROM '[0-9]+$') AS INTEGER
+            SUBSTRING(application_number FROM '[0-9]{6}$') AS INTEGER
         )
     ), 0) + 1 INTO seq_num
     FROM applications
-    WHERE application_number LIKE 'APP-' || year_str || '-%';
+    WHERE application_number LIKE prefix || '-' || year_str || '-' || month_str || '-%';
     
-    new_number := 'APP-' || year_str || '-' || LPAD(seq_num::TEXT, 5, '0');
+    new_number := FORMAT('%s-%s-%s-%06d', prefix, year_str, month_str, seq_num);
     NEW.application_number := new_number;
     
     RETURN NEW;

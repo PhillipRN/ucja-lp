@@ -65,6 +65,7 @@ try {
         'payment_status' => 'pending',
         'kyc_status' => 'pending',
         'application_status' => 'submitted',
+        'environment' => APP_ENV,
         'special_requests' => $specialRequests,
         'submitted_at' => date('c')
     ];
