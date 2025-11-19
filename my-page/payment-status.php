@@ -98,6 +98,9 @@ $paymentStatus = $application['payment_status'] ?? 'pending';
 $cardRegistered = $application['card_registered'] ?? false;
 $kycStatus = $application['kyc_status'] ?? 'pending';
 $isKycCompleted = in_array($kycStatus, ['approved', 'completed'], true);
+$kycAvailable = function_exists('isKycAvailable') ? isKycAvailable() : true;
+$kycAvailableDateLabel = function_exists('getKycAvailableDateLabel') ? getKycAvailableDateLabel() : null;
+$isProductionEnv = (APP_ENV === 'production');
 $applicationChargedAtLabel = formatDateTimeLabel($application['charged_at'] ?? null);
 $applicationCardRegisteredAtLabel = formatDateTimeLabel($application['card_registered_at'] ?? null);
 $supportEmail = 'contact@univ-cambridge-japan.academy';
@@ -256,6 +259,11 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                 <div>
                     <h2 class="text-3xl font-bold text-gray-900 mb-2">支払い状況</h2>
                     <p class="text-gray-600">参加費のお支払い状況を確認できます</p>
+                    <?php if ($isProductionEnv && !$kycAvailable && !$isKycCompleted): ?>
+                    <div class="mt-4 bg-yellow-50 border border-yellow-200 text-yellow-900 rounded-lg px-4 py-3 text-sm">
+                        本人確認は<?php echo htmlspecialchars($kycAvailableDateLabel ?? '近日中'); ?>より開始予定です。準備が整うまでお待ちください。
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <?php if ($isTeamMemberView && $teamMemberData): ?>
@@ -476,8 +484,18 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                             </h4>
                             <p class="text-gray-700 mb-6"><?php echo $description; ?></p>
                             
-                            <?php if (!$isKycCompleted): ?>
-                            <!-- KYC未完了の警告 -->
+                        <?php if (!$isKycCompleted): ?>
+                            <?php if ($isProductionEnv && !$kycAvailable): ?>
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 text-left">
+                                <div class="flex items-start">
+                                    <i class="ri-time-line text-gray-600 text-xl mr-3 mt-0.5"></i>
+                                    <div class="text-sm text-gray-700">
+                                        <p class="font-semibold mb-1">本人確認は<?php echo htmlspecialchars($kycAvailableDateLabel ?? '近日中'); ?>開始予定です</p>
+                                        <p>カード登録のみ先に完了させていただき、本人確認は開始日以降に改めてご案内いたします。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php else: ?>
                             <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-left">
                                 <div class="flex items-start">
                                     <i class="ri-information-line text-red-600 text-xl mr-3 mt-0.5"></i>
@@ -488,6 +506,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                                 </div>
                             </div>
                             <?php endif; ?>
+                        <?php endif; ?>
                             
                             <a
                                 href="<?php echo $checkoutUrl; ?>"

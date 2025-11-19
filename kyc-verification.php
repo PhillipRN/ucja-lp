@@ -1,3 +1,9 @@
+<?php
+require_once __DIR__ . '/config/config.php';
+$kycAvailable = function_exists('isKycAvailable') ? isKycAvailable() : true;
+$kycAvailableDateLabel = function_exists('getKycAvailableDateLabel') ? getKycAvailableDateLabel() : null;
+$isProductionEnv = (APP_ENV === 'production');
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -18,6 +24,23 @@
 </head>
 <body class="antialiased bg-gradient-to-br from-blue-50 to-purple-50">
 
+    <?php if ($isProductionEnv && !$kycAvailable): ?>
+    <div class="min-h-screen flex items-center justify-center px-6 py-12">
+        <div class="max-w-xl w-full bg-white rounded-3xl shadow-2xl p-10 text-center">
+            <div class="w-20 h-20 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="ri-time-line text-4xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">本人確認は準備中です</h1>
+            <p class="text-gray-600 mb-6">
+                本人確認手続きは<?php echo htmlspecialchars($kycAvailableDateLabel ?? '近日中'); ?>より開始予定です。開始時期になりましたら事務局よりメールでご案内いたします。
+            </p>
+            <a href="my-page/kyc-status.php" class="inline-flex items-center bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                <i class="ri-arrow-left-line mr-2"></i>
+                マイページに戻る
+            </a>
+        </div>
+    </div>
+    <?php else: ?>
     <div class="min-h-screen flex items-center justify-center px-6 py-12">
         <div class="max-w-2xl w-full">
             <!-- Liquid ロゴエリア -->
@@ -169,6 +192,7 @@
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
     <script>
     async function simulateCapture() {

@@ -21,6 +21,7 @@
 | `SENDGRID_FROM_EMAIL` / `SENDGRID_FROM_NAME` | 送信元メールアドレス・差出人名                       | 本番では公式ドメインのアドレスを使用                                                     |
 | `SENDGRID_API_KEY`           | SendGrid API キー                                       | テスト／本番で別キーを利用する場合                                                       |
 | `KYC_ENABLED`, `KYC_PROVIDER`, `KYC_API_KEY`, `KYC_API_SECRET` | eKYC を使用する際に true に切り替え、本番 API 情報を設定 | 現状は `false`（手動）運用。リリース時に Liquid 側の本番情報を設定                       |
+| `KYC_AVAILABLE_AT`            | 本番で本人確認を開放する日時を制御                        | 例: `2025-12-01 00:00:00`。`APP_ENV=production` のときだけ有効                             |
 | `CORS_ALLOWED_ORIGINS`       | API を呼び出す許可ドメイン                              | 本番ドメインを追加                                                                      |
 | `UPLOAD_DIR`, `RATE_LIMIT_MAX_REQUESTS` など | 必要に応じて個別に調整                                | 通常は共通のままで問題なし                                                               |
 

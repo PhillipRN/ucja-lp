@@ -38,6 +38,9 @@ try {
 }
 
 $kycStatus = $application['kyc_status'] ?? 'pending';
+$kycAvailable = function_exists('isKycAvailable') ? isKycAvailable() : true;
+$kycAvailableDateLabel = function_exists('getKycAvailableDateLabel') ? getKycAvailableDateLabel() : null;
+$isProductionEnv = (APP_ENV === 'production');
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -173,6 +176,11 @@ $kycStatus = $application['kyc_status'] ?? 'pending';
                 <div>
                     <h2 class="text-3xl font-bold text-gray-900 mb-2">本人確認状況</h2>
                     <p class="text-gray-600">学生証による本人確認の状況を確認できます</p>
+                    <?php if ($isProductionEnv && !$kycAvailable && $kycAvailableDateLabel): ?>
+                    <div class="mt-4 bg-yellow-50 border border-yellow-200 text-yellow-900 rounded-lg px-4 py-3 text-sm">
+                        本人確認は<?php echo htmlspecialchars($kycAvailableDateLabel); ?>より受付開始予定です。開始までもう少々お待ちください。
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- 本人確認ステータスカード -->
@@ -243,8 +251,18 @@ $kycStatus = $application['kyc_status'] ?? 'pending';
                                 <i class="ri-alert-line text-yellow-600 text-4xl"></i>
                             </div>
                             <h4 class="text-2xl font-bold text-gray-900 mb-2">本人確認が必要です</h4>
-                            <p class="text-gray-700 mb-6">学生証による本人確認を実施してください</p>
+                            <p class="text-gray-700 mb-6">
+                                学生証による本人確認を実施してください。<?php if ($isProductionEnv && !$kycAvailable && $kycAvailableDateLabel): ?>
+                                本人確認は<?php echo htmlspecialchars($kycAvailableDateLabel); ?>より開始予定です。準備が整い次第メールでご案内します。
+                                <?php endif; ?>
+                            </p>
                             
+                            <?php if ($isProductionEnv && !$kycAvailable): ?>
+                            <div class="inline-flex items-center bg-gray-200 text-gray-600 px-8 py-4 rounded-lg font-semibold text-lg">
+                                <i class="ri-time-line mr-2"></i>
+                                開始までお待ちください
+                            </div>
+                            <?php else: ?>
                             <a
                                 href="../kyc-verification.php"
                                 class="inline-flex items-center bg-gradient-blue-teal hover-gradient-blue-teal text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
@@ -252,11 +270,11 @@ $kycStatus = $application['kyc_status'] ?? 'pending';
                                 <i class="ri-shield-check-line mr-2"></i>
                                 本人確認を開始する
                             </a>
-
                             <p class="text-sm text-gray-600 mt-4">
                                 <i class="ri-time-line mr-1"></i>
                                 所要時間：約3分
                             </p>
+                            <?php endif; ?>
                         </div>
                         <?php endif; ?>
                     </div>
