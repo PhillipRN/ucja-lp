@@ -151,6 +151,16 @@ include __DIR__ . '/components/header.php';
                 <p id="confirmRecipient" class="text-gray-700">-</p>
             </div>
 
+            <!-- 送信予約 -->
+            <div id="scheduleSummary" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                    <i class="ri-calendar-line mr-2"></i>
+                    送信予約
+                </h4>
+                <p id="confirmScheduleAt" class="text-blue-800 text-sm mb-1">-</p>
+                <p id="confirmDeadline" class="text-blue-700 text-xs">-</p>
+            </div>
+
             <!-- テストモード -->
             <div id="confirmTestMode" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <h4 class="font-semibold text-yellow-800 mb-2">
@@ -189,6 +199,33 @@ include __DIR__ . '/components/header.php';
             </button>
         </div>
     </div>
+</div>
+
+<!-- 送信予約フィールド（特定テンプレートのみ表示） -->
+<div id="scheduleFields" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-6 mt-6">
+    <h4 class="font-semibold text-blue-900 mb-3 flex items-center">
+        <i class="ri-calendar-check-line mr-2"></i>
+        送信日時を指定
+    </h4>
+    <div class="grid md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-blue-900 mb-2">
+                送信予定日時
+            </label>
+            <input type="datetime-local" id="scheduleAt"
+                class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-blue-900 mb-2">
+                支払い期限（任意）
+            </label>
+            <input type="date" id="deadlineDate"
+                class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+    </div>
+    <p class="text-xs text-blue-800 mt-3">
+        指定した日時になると自動的にメールが送信されます。未入力の場合は即時送信されます。
+    </p>
 </div>
 
 <script>
@@ -237,6 +274,7 @@ function renderTemplates() {
         'kyc_required': '本人確認依頼',
         'payment_confirmation': '決済完了通知',
         'exam_reminder': '試験日リマインダー',
+        'team_member_payment': 'チームメンバー支払い依頼',
         'custom': 'カスタム'
     };
 
@@ -264,6 +302,7 @@ function selectTemplate(templateId) {
     selectedTemplate = templates.find(t => t.id === templateId);
     document.getElementById('nextToStep2').disabled = false;
     renderTemplates();
+    updateScheduleVisibility();
 }
 
 // 受信者タイプ更新
@@ -340,6 +379,23 @@ function updateConfirmation() {
 
     const testMode = document.getElementById('testMode').checked;
     document.getElementById('confirmTestMode').classList.toggle('hidden', !testMode);
+
+    const scheduleSummary = document.getElementById('scheduleSummary');
+    if (scheduleSummary) {
+        const scheduleFields = document.getElementById('scheduleFields');
+        const scheduleInput = document.getElementById('scheduleAt');
+        const deadlineInput = document.getElementById('deadlineDate');
+
+        if (!scheduleFields.classList.contains('hidden') && scheduleInput.value) {
+            scheduleSummary.classList.remove('hidden');
+            document.getElementById('confirmScheduleAt').textContent =
+                '送信予定: ' + new Date(scheduleInput.value).toLocaleString();
+            document.getElementById('confirmDeadline').textContent =
+                deadlineInput.value ? ('支払い期限: ' + deadlineInput.value) : '支払い期限: 指定なし';
+        } else {
+            scheduleSummary.classList.add('hidden');
+        }
+    }
 }
 
 // 一斉メール送信
@@ -360,6 +416,14 @@ async function sendBulkEmail() {
             payment_status: document.getElementById('filterPayment').value
         };
         const testMode = document.getElementById('testMode').checked;
+        const scheduleFields = document.getElementById('scheduleFields');
+        let scheduleAt = null;
+        let deadline = null;
+
+        if (!scheduleFields.classList.contains('hidden')) {
+            scheduleAt = document.getElementById('scheduleAt').value || null;
+            deadline = document.getElementById('deadlineDate').value || null;
+        }
 
         const response = await fetch('../api/admin/send-bulk-email.php', {
             method: 'POST',
@@ -370,7 +434,9 @@ async function sendBulkEmail() {
                 template_id: selectedTemplateId,
                 recipient_type: recipientType,
                 filters: filters,
-                test_mode: testMode
+                test_mode: testMode,
+                schedule_at: scheduleAt,
+                deadline: deadline
             })
         });
 
@@ -395,6 +461,17 @@ async function sendBulkEmail() {
         showMessage('エラーが発生しました', 'error');
         sendButton.disabled = false;
         sendButton.innerHTML = '<i class="ri-mail-send-line mr-2 text-xl"></i>送信する';
+    }
+}
+
+function updateScheduleVisibility() {
+    const scheduleFields = document.getElementById('scheduleFields');
+    if (selectedTemplate && selectedTemplate.template_type === 'team_member_payment') {
+        scheduleFields.classList.remove('hidden');
+    } else {
+        scheduleFields.classList.add('hidden');
+        document.getElementById('scheduleAt').value = '';
+        document.getElementById('deadlineDate').value = '';
     }
 }
 

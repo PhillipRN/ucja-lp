@@ -3,7 +3,7 @@
         <div class="text-center mb-16">
             <h2 class="text-4xl font-bold text-gray-900 mb-6">申込フォーム</h2>
             <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                申込は2ステップで完了します。まず基本情報をご入力ください
+            チーム戦のお申込は、右側の「チーム戦」を選択<br>個人戦のお申込は、左側の「個人戦」を選択<br>まず基本情報をご入力ください<br>※チーム戦に登録されたメンバーは、全員自動的に個人戦にも登録されます。
             </p>
         </div>
         
@@ -167,55 +167,8 @@
                                 />
                             </div>
                             
-                            <!-- 決済者情報 -->
-                             <!--
-                            <div class="md:col-span-2 mt-6 mb-4">
-                                <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200">
-                                    <h3 class="font-bold text-gray-900 mb-2 flex items-center">
-                                        <i class="ri-bank-card-line text-purple-600 mr-2 text-xl"></i>
-                                        クレジットカード決済者情報
-                                    </h3>
-                                    <p class="text-sm text-gray-600 mb-4">
-                                        決済に使用するクレジットカードの名義人（保護者）の情報をご入力ください。<br>
-                                        カード名義と一致する氏名を正確にご記入ください。
-                                    </p>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                カード名義人 氏名（漢字）<span class="text-red-600 ml-1">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="cardHolderName"
-                                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm bg-white"
-                                                placeholder="山田花子"
-                                            />
-                                            <p class="text-xs text-gray-500 mt-1">※保護者氏名と異なる場合のみ記入</p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                カード名義人 氏名（ローマ字）<span class="text-red-600 ml-1">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="cardHolderNameRomaji"
-                                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm bg-white"
-                                                placeholder="HANAKO YAMADA"
-                                            />
-                                            <p class="text-xs text-gray-500 mt-1">※カードに記載の通りに入力してください</p>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4 bg-white rounded-lg p-4 border border-purple-200">
-                                        <div class="flex items-start space-x-2">
-                                            <i class="ri-information-line text-purple-600 mt-0.5"></i>
-                                            <p class="text-xs text-gray-700">
-                                                カード決済はStripe決済システムを利用します。カード情報は国際セキュリティ基準PCI DSSに準拠した安全な環境で処理されます。
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>-->
                             
+                            <!--
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     特記事項・ご質問
@@ -232,7 +185,7 @@
                                 <div class="text-right text-sm text-gray-500 mt-1">
                                     <span id="specialRequestsCount-individual">0</span>/500文字
                                 </div>
-                            </div>
+                            </div>-->
                         </div>
                         </div>
 
@@ -406,7 +359,7 @@
 
                             <!-- 代表者情報 -->
                             <div class="md:col-span-2 mt-4 mb-4">
-                                <h3 class="text-lg font-bold text-gray-900 mb-4">代表者（保護者）情報</h3>
+                                <h3 class="text-lg font-bold text-gray-900 mb-4">代表者の保護者情報</h3>
                             </div>
 
                             <div>
@@ -458,53 +411,7 @@
                                 />
                             </div>
 
-                            <!-- 決済者情報（チーム戦） -->
-                            <!--<div class="md:col-span-2 mt-6 mb-4">
-                                <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200">
-                                    <h3 class="font-bold text-gray-900 mb-2 flex items-center">
-                                        <i class="ri-bank-card-line text-purple-600 mr-2 text-xl"></i>
-                                        クレジットカード決済者情報
-                                    </h3>
-                                    <p class="text-sm text-gray-600 mb-4">
-                                        決済に使用するクレジットカードの名義人（保護者）の情報をご入力ください。<br>
-                                        カード名義と一致する氏名を正確にご記入ください。
-                                    </p>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                カード名義人 氏名（漢字）<span class="text-red-600 ml-1">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="cardHolderName-team"
-                                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm bg-white"
-                                                placeholder="山田花子"
-                                            />
-                                            <p class="text-xs text-gray-500 mt-1">※保護者氏名と異なる場合のみ記入</p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                カード名義人 氏名（ローマ字）<span class="text-red-600 ml-1">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="cardHolderNameRomaji-team"
-                                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm bg-white"
-                                                placeholder="HANAKO YAMADA"
-                                            />
-                                            <p class="text-xs text-gray-500 mt-1">※カードに記載の通りに入力してください</p>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4 bg-white rounded-lg p-4 border border-purple-200">
-                                        <div class="flex items-start space-x-2">
-                                            <i class="ri-information-line text-purple-600 mt-0.5"></i>
-                                            <p class="text-xs text-gray-700">
-                                                カード決済はStripe決済システムを利用します。カード情報は国際セキュリティ基準PCI DSSに準拠した安全な環境で処理されます。
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>-->
+                            <!--
 
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -522,7 +429,7 @@
                                 <div class="text-right text-sm text-gray-500 mt-1">
                                     <span id="specialRequestsCount-team">0</span>/500文字
                                 </div>
-                            </div>
+                            </div>-->
                         </div>
                         </div>
                         
@@ -720,7 +627,7 @@
                         <div class="bg-white rounded-xl p-6 border border-gray-200">
                             <h4 class="font-bold text-gray-900 mb-4 flex items-center">
                                 <i class="ri-parent-line text-blue-600 mr-2"></i>
-                                代表者（保護者）情報
+                                代表者の保護者情報
                             </h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -738,13 +645,13 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-xl p-6 border border-gray-200" id="confirm-specialRequests-team-wrapper">
+                        <!--<div class="bg-white rounded-xl p-6 border border-gray-200" id="confirm-specialRequests-team-wrapper">
                             <h4 class="font-bold text-gray-900 mb-4 flex items-center">
                                 <i class="ri-message-line text-blue-600 mr-2"></i>
                                 特記事項・ご質問
                             </h4>
                             <div class="text-gray-900" id="confirm-specialRequests-team"></div>
-                        </div>
+                        </div>-->
                     </div>
 
                     <div class="flex items-center justify-between mt-8">

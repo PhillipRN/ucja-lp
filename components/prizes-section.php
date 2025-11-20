@@ -8,7 +8,7 @@
         </div>
         
         <!-- メイン賞品セクション -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             <!-- 左側：参加者全員の賞品 -->
             <div class="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
                 <!-- 上段：テキスト説明 -->
@@ -37,6 +37,24 @@
                             class="w-full h-64 object-contain p-2"
                         />
                     </div>
+                    <p class="absolute bottom-2 right-2 text-xs text-gray-500 bg-white/80 px-2 py-1 rounded">※写真はイメージです。</p>
+                </div>
+            </div>
+            
+            <!-- 中央：チーム戦1位〜10位の賞品 -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
+                <div class="p-8 text-center flex-grow flex flex-col justify-center">
+                    <div class="flex items-center justify-center space-x-2 mb-4">
+                        <span class="text-gray-900 font-bold text-xl">▲ チーム戦の1位〜10位</span>
+                    </div>
+                    <p class="text-gray-700 font-semibold text-lg">各チームへ10万円分の商品券</p>
+                </div>
+                <div class="bg-gray-50 flex items-center justify-center mt-auto relative">
+                    <img
+                        src="images/present_ticket.JPG"
+                        alt="商品券"
+                        class="w-full h-64 object-cover"
+                    />
                     <p class="absolute bottom-2 right-2 text-xs text-gray-500 bg-white/80 px-2 py-1 rounded">※写真はイメージです。</p>
                 </div>
             </div>

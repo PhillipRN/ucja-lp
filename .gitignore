@@ -44,3 +44,6 @@ node_modules/
 dist/
 build/
 
+
+# Prod config (local only)
+config/config_prod.php

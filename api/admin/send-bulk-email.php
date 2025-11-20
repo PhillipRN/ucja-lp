@@ -8,6 +8,7 @@ header('Content-Type: application/json');
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../lib/SupabaseClient.php';
 require_once __DIR__ . '/../../lib/AdminAuthHelper.php';
+require_once __DIR__ . '/../../lib/EmailTemplateService.php';
 
 try {
     // 管理者認証チェック
@@ -29,6 +30,8 @@ try {
     $applicationIds = $input['application_ids'] ?? []; // specific用
     $filters = $input['filters'] ?? []; // filter用
     $testMode = $input['test_mode'] ?? false; // テストモード
+    $scheduleAtInput = $input['schedule_at'] ?? null;
+    $deadlineInput = $input['deadline'] ?? null;
 
     if (empty($templateId)) {
         throw new Exception('テンプレートを選択してください');
@@ -51,6 +54,73 @@ try {
 
     if (!$template['is_active']) {
         throw new Exception('このテンプレートは無効になっています');
+    }
+
+    // 送信予約のバリデーション
+    $scheduledAtIso = null;
+    $scheduleTimezone = new DateTimeZone('Asia/Tokyo');
+
+    if (!empty($scheduleAtInput)) {
+        try {
+            $scheduleDateTime = new DateTime($scheduleAtInput, $scheduleTimezone);
+        } catch (Exception $dtException) {
+            throw new Exception('送信予定日時の形式が正しくありません');
+        }
+
+        $now = new DateTime('now', $scheduleTimezone);
+        if ($scheduleDateTime <= $now) {
+            throw new Exception('送信予定日時は現在より後の時間を指定してください');
+        }
+
+        $scheduledAtIso = $scheduleDateTime->format(DateTime::ATOM);
+    }
+
+    if ($scheduledAtIso !== null) {
+        if ($template['template_type'] !== 'team_member_payment') {
+            throw new Exception('このテンプレートでは送信予約を利用できません');
+        }
+
+        $filterPayload = [
+            'mode' => $recipientType,
+            'filters' => $filters,
+            'application_ids' => $applicationIds,
+            'deadline' => $deadlineInput,
+            'test_mode' => (bool)$testMode
+        ];
+
+        $batchData = [
+            'batch_name' => $template['template_name'] . '（予約送信）',
+            'subject' => $template['subject'],
+            'template_id' => $templateId,
+            'recipient_type' => 'guardian',
+            'recipient_filter' => json_encode($filterPayload),
+            'status' => 'pending',
+            'created_by' => $admin['id'],
+            'scheduled_at' => $scheduledAtIso
+        ];
+
+        $batchResult = $supabase->insert('email_batches', $batchData);
+
+        if (!$batchResult['success']) {
+            throw new Exception('送信予約の作成に失敗しました');
+        }
+
+        $supabase->insert('admin_activity_logs', [
+            'admin_id' => $admin['id'],
+            'action' => 'schedule_bulk_email',
+            'details' => json_encode([
+                'template_id' => $templateId,
+                'template_name' => $template['template_name'],
+                'scheduled_at' => $scheduledAtIso,
+                'filters' => $filters
+            ])
+        ]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => '送信予約を登録しました（' . (new DateTime($scheduledAtIso))->setTimezone($scheduleTimezone)->format('Y-m-d H:i') . ' 送信予定）'
+        ]);
+        exit;
     }
 
     // 送信対象の申込を取得
@@ -81,7 +151,48 @@ try {
 
     $applications = $applicationsResult['data'];
 
-    // メールログを作成（実際の送信は別のバッチ処理で行う想定）
+    // guardian向けチームメンバー支払い依頼（即時送信）
+    if ($template['template_type'] === 'team_member_payment') {
+        $emailTemplateService = new EmailTemplateService($supabase);
+        $deadlineLabel = formatDeadlineLabel($deadlineInput);
+
+        $stats = sendGuardianPaymentReminders(
+            $applications,
+            $supabase,
+            $emailTemplateService,
+            $deadlineLabel,
+            $testMode
+        );
+
+        $supabase->insert('admin_activity_logs', [
+            'admin_id' => $admin['id'],
+            'action' => 'send_team_member_payment_guardian',
+            'details' => json_encode([
+                'template_id' => $templateId,
+                'template_name' => $template['template_name'],
+                'recipient_type' => $recipientType,
+                'recipient_count' => $stats['total'],
+                'sent' => $stats['sent'],
+                'failed' => $stats['failed'],
+                'test_mode' => $testMode,
+                'deadline' => $deadlineLabel
+            ])
+        ]);
+
+        $message = $testMode
+            ? sprintf('テストモード: %d件のリマインダーをシミュレーションしました（実送信なし）', $stats['total'])
+            : sprintf('%d件の保護者宛リマインダーを送信しました（失敗 %d）', $stats['sent'], $stats['failed']);
+
+        echo json_encode([
+            'success' => true,
+            'message' => $message,
+            'count' => $stats['sent'],
+            'failed' => $stats['failed']
+        ]);
+        exit;
+    }
+
+    // それ以外のテンプレート: メールログを作成
     $emailLogs = [];
     $createdCount = 0;
 
@@ -164,5 +275,143 @@ try {
         'success' => false,
         'error' => $e->getMessage()
     ]);
+}
+
+function sendGuardianPaymentReminders(
+    array $applications,
+    SupabaseClient $supabase,
+    EmailTemplateService $emailTemplateService,
+    ?string $deadlineLabel,
+    bool $testMode = false
+): array {
+    $total = 0;
+    $sent = 0;
+    $failed = 0;
+
+    foreach ($applications as $app) {
+        if (($app['participation_type'] ?? '') !== 'team') {
+            continue;
+        }
+
+        $team = fetchTeamApplicationForBatch($supabase, $app['id']);
+        if (!$team) {
+            continue;
+        }
+
+        $members = fetchPendingMembersForBatch($supabase, $team['id']);
+        if (empty($members)) {
+            continue;
+        }
+
+        foreach ($members as $member) {
+            $total++;
+            $variables = buildGuardianReminderVariables($app, $team, $member, $deadlineLabel);
+
+            if ($testMode) {
+                $sent++;
+                continue;
+            }
+
+            try {
+                $emailTemplateService->sendTemplate(
+                    'team_member_payment',
+                    [
+                        'email' => $team['guardian_email'],
+                        'name' => $team['guardian_name']
+                    ],
+                    $variables,
+                    [
+                        'application_id' => $app['id'],
+                        'metadata' => [
+                            'team_member_id' => $member['id'],
+                            'reminder_type' => 'guardian_payment_request'
+                        ]
+                    ]
+                );
+                $sent++;
+
+                $supabase->update('team_members', [
+                    'payment_link_sent_at' => date(DATE_ATOM)
+                ], [
+                    'id' => 'eq.' . $member['id']
+                ]);
+            } catch (Exception $e) {
+                $failed++;
+                error_log(sprintf('[send-bulk-email] guardian reminder failed: %s', $e->getMessage()));
+            }
+        }
+    }
+
+    return [
+        'total' => $total,
+        'sent' => $sent,
+        'failed' => $failed
+    ];
+}
+
+function fetchTeamApplicationForBatch(SupabaseClient $supabase, string $applicationId): ?array
+{
+    $result = $supabase->from('team_applications')
+        ->select('id, team_name, guardian_name, guardian_email')
+        ->eq('application_id', $applicationId)
+        ->single();
+
+    if ($result['success'] && !empty($result['data'])) {
+        return $result['data'];
+    }
+
+    return null;
+}
+
+function fetchPendingMembersForBatch(SupabaseClient $supabase, string $teamApplicationId): array
+{
+    $result = $supabase->from('team_members')
+        ->select('id, member_name, member_email, member_number, payment_status')
+        ->eq('team_application_id', $teamApplicationId)
+        ->neq('payment_status', 'completed')
+        ->order('member_number', true)
+        ->execute();
+
+    if ($result['success']) {
+        return $result['data'] ?? [];
+    }
+
+    return [];
+}
+
+function buildGuardianReminderVariables(
+    array $application,
+    array $team,
+    array $member,
+    ?string $deadlineLabel
+): array {
+    $amount = defined('REGULAR_PRICE') ? REGULAR_PRICE : 0;
+    $paymentLink = rtrim(APP_URL, '/') . '/my-page/team-status.php';
+
+    return [
+        'guardian_name' => $team['guardian_name'] ?? '',
+        'member_name' => $member['member_name'] ?? '',
+        'member_email' => $member['member_email'] ?? '',
+        'team_name' => $team['team_name'] ?? '',
+        'representative_name' => $team['guardian_name'] ?? '',
+        'application_number' => $application['application_number'] ?? '',
+        'amount' => number_format($amount),
+        'payment_link' => $paymentLink,
+        'deadline' => $deadlineLabel ?? '未設定'
+    ];
+}
+
+function formatDeadlineLabel(?string $deadline): ?string
+{
+    if (!$deadline) {
+        return null;
+    }
+
+    try {
+        $dt = new DateTime($deadline, new DateTimeZone('Asia/Tokyo'));
+        return $dt->format('Y年n月j日');
+    } catch (Exception $e) {
+        return $deadline;
+    }
 }
 

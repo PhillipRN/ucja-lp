@@ -41,7 +41,7 @@ $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
             <!-- ロゴ・タイトル -->
             <div class="text-center mb-8">
                 <a href="index.php" class="inline-block">
-                    <img src="images/cambridge-logo.png" alt="Cambridge Logo" class="h-16 mx-auto mb-4">
+                    <img src="images/UCJA_Academy_logo_fin.png" alt="Cambridge Logo" class="h-16 mx-auto mb-4">
                 </a>
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">マイページログイン</h1>
                 <p class="text-gray-600">申込情報の確認・管理</p>

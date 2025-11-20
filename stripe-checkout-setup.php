@@ -11,7 +11,7 @@ require_once __DIR__ . '/config/config.php';
     <meta name="robots" content="noindex, nofollow">
     <meta name="googlebot" content="noindex, nofollow">
     
-    <title>カード情報登録 - Stripe</title>
+    <title>クレジットカード情報登録 - Stripe</title>
     
     <!-- Remix Icon CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css">
@@ -50,8 +50,8 @@ require_once __DIR__ . '/config/config.php';
                             戻る
                         </button>
 
-                        <h1 class="text-2xl font-bold text-gray-900 mb-2">カード情報登録</h1>
-                        <p class="text-gray-600 mb-2">参加費のお支払いに使用するカード情報を登録してください</p>
+                        <h1 class="text-2xl font-bold text-gray-900 mb-2">クレジットカード情報登録</h1>
+                        <p class="text-gray-600 mb-2">参加費のお支払いに使用するクレジットカード情報を登録してください</p>
                         <p class="text-sm text-gray-500 mb-2">
                             申込番号: <span id="display-application-number" class="font-mono font-semibold text-blue-600">-</span>
                         </p>
@@ -63,7 +63,7 @@ require_once __DIR__ . '/config/config.php';
                                 <div>
                                     <p class="font-semibold text-blue-900 mb-1">本人確認完了後に自動決済されます</p>
                                     <p class="text-sm text-blue-800">
-                                        今回はカード情報の登録のみで、決済は行われません。<br>
+                                        今回はクレジットカード情報の登録のみで、決済は行われません。<br>
                                         本人確認（eKYC）が完了した時点で、登録されたカードに自動的に課金されます。
                                     </p>
                                 </div>
@@ -74,7 +74,7 @@ require_once __DIR__ . '/config/config.php';
                             <!-- カード情報 (Stripe Elements) -->
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    カード情報
+                                    クレジットカード情報
                                 </label>
                                 <div id="card-element" class="border border-gray-300 rounded-lg p-4">
                                     <!-- Stripe Card Element がここに挿入されます -->
@@ -82,7 +82,7 @@ require_once __DIR__ . '/config/config.php';
                                 <div id="card-errors" class="text-red-600 text-sm mt-2"></div>
                                 <p class="text-xs text-gray-500 mt-2">
                                     <i class="ri-lock-line mr-1"></i>
-                                    カード情報は暗号化され安全に処理されます
+                                    クレジットカード情報は暗号化され安全に処理されます
                                 </p>
                             </div>
 
@@ -106,7 +106,7 @@ require_once __DIR__ . '/config/config.php';
                                 class="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 id="submit-button"
                             >
-                                <span id="button-text">カード情報を登録する</span>
+                                <span id="button-text">クレジットカード情報を登録する</span>
                                 <span id="button-spinner" class="hidden">
                                     <i class="ri-loader-4-line animate-spin"></i> 処理中...
                                 </span>

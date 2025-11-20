@@ -37,13 +37,13 @@
                         <p class="font-bold mb-3 leading-tight">
                             <span class="text-3xl md:text-4xl text-black">2026.1.4</span><br>
                             <span class="text-2xl md:text-3xl text-black">
-                                AM10:00 (一斉スタート) <span class="hidden md:inline">/</span><br class="md:hidden">
-                                AM11:00（一斉終了）
+                                10:00AM (一斉スタート) <span class="hidden md:inline">/</span><br class="md:hidden">
+                                11:00AM（一斉終了）
                             </span>
                         </p>
                         <div class="border-t border-black pt-3" style="border-top-width: 0.5px;">
                             <div class="py-4">
-                                <p class="text-2xl font-bold text-red-600"><span class="text-4xl md:text-4xl text-red-600">2025年11月21日</span><br>申込スタート！</p>
+                                <p class="text-2xl font-bold text-red-600"><span class="text-4xl md:text-4xl text-red-600">2025年11月21日 (12:00PM)</span><br>申込スタート！</p>
                             </div>
                             <hr class="border-gray-500" style="border-top-width: 0.5px;" />
                             <p class="text-base md:text-lg text-gray-700 leading-tight pt-3">

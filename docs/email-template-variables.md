@@ -25,11 +25,18 @@
 | `payment_confirmation`<br>決済完了通知            | `guardian_name`, `application_number`, `participant_name`, `amount`, `payment_date`, `exam_date`, `mypage_url`                                      |
 | `payment_failed`<br>決済エラー通知               | `guardian_name`, `participant_name`, `application_number`, `amount`, `error_message`, `support_email`, `mypage_url`                                  |
 | `exam_reminder`<br>試験日リマインダー             | `guardian_name`, `application_number`, `exam_date`, `meeting_time`, `venue_name`, `venue_address`, `emergency_contact`, `map_url`, `mypage_url`     |
-| `team_member_payment`<br>チームメンバー支払い依頼 | `member_name`, `team_name`, `representative_name`, `amount`, `application_number`, `payment_link`, `deadline`                                       |
+| `team_member_payment`<br>チームメンバー支払い依頼 | `guardian_name`, `member_name`, `member_email`, `team_name`, `representative_name`, `amount`, `application_number`, `payment_link`, `deadline`       |
 | `kyc_completed`<br>本人確認完了通知               | `guardian_name`, `application_number`, `amount`                                                                                                     |
 | `general_announcement`<br>汎用お知らせ            | `guardian_name`, `announcement_title`, `announcement_content`                                                                                       |
 | `schedule_change`<br>試験日程変更通知             | `guardian_name`, `application_number`, `old_date`, `new_date`, `venue_name`, `venue_address`, `change_reason`, `contact_email`, `response_deadline` |
 | `result_announcement`<br>結果発表通知             | `guardian_name`, `application_number`, `mypage_url`                                                                                                 |
+
+## チームメンバー支払いリマインダー（保護者向け）
+
+- 管理画面の「一斉メール送信」で `team_member_payment` を選択すると、送信日時と支払い期限を指定できます。
+- 送信予約が作成されると、`scripts/run-email-batches.php` が cron から実行されたタイミングで guardian（保護者）宛にメールが配信されます。
+- 送信対象はフィルター条件で絞り込めます（未決済メンバーのみ抽出されます）。
+- cron 例: `*/10 * * * * /usr/bin/php8.2 /path/to/scripts/run-email-batches.php >> /path/to/log 2>&1`
 
 > 💡 **テキスト版のみ更新すれば OK**  
 > `EmailTemplateService` が送信時にテキスト版の内容から HTML を自動生成するため、編集部はテキストタブだけを更新すれば最新内容が HTML メールにも反映されます（`EMAIL_AUTO_GENERATE_HTML_FROM_TEXT = true` が前提）。

@@ -131,10 +131,10 @@
                                 <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">2</div>
                                 <div>
                                     <div class="font-semibold text-gray-900 mb-1 flex items-center">
-                                        本人確認の実施
+                                        本人確認(2025年12月1日より実施)
                                         <span class="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">後日実施</span>
                                     </div>
-                                    <div class="text-sm text-gray-700">学生証による本人確認を完了させてください（マイページから実施可能）。</div>
+                                    <div class="text-sm text-gray-700">学生証による本人確認を完了させてください（マイページから）。</div>
                                 </div>
                             </div>
                             <div class="flex items-start">
@@ -155,7 +155,7 @@
                             class="inline-flex items-center bg-gradient-to-r from-green-600 to-emerald-600 text-white px-12 py-4 rounded-full text-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl"
                         >
                             <i class="ri-bank-card-line text-2xl mr-2"></i>
-                            今すぐカード情報を登録する
+                            今すぐクレジットカード情報を登録する
                         </a>
                         
                         <div class="text-sm text-gray-600">
@@ -191,7 +191,7 @@
                     ご確認ください
                 </h3>
                 <ul class="text-sm text-gray-700 space-y-2">
-                    <li>• カード登録は今すぐこのページから実施できます</li>
+                    <li>• クレジットカード登録は今すぐこのページから実施できます</li>
                     <li>• マイページで申込状況・支払い状況をいつでも確認できます</li>
                     <li>• 本人確認は後日、マイページから実施してください</li>
                     <li>• ご不明な点がございましたら、お気軽にお問い合わせください</li>

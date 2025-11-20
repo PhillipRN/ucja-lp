@@ -8,7 +8,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="googlebot" content="noindex, nofollow">
     
-    <title>カード登録完了 - Cambridge English Challenge</title>
+    <title>クレジットカード登録完了 - Cambridge English Challenge</title>
     
     <!-- Remix Icon CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css">
@@ -33,7 +33,7 @@
 
                 <!-- タイトル -->
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    カード情報の登録が<br>完了しました！
+                    クレジットカード情報の登録が<br>完了しました！
                 </h1>
 
                 <!-- サブタイトル -->
@@ -63,7 +63,7 @@
                                 </li>
                                 <li class="flex items-start">
                                     <span class="font-bold mr-2">2.</span>
-                                    <span>本人確認完了後、自動的にカード決済が実行されます</span>
+                                    <span>本人確認完了後、自動的にクレジットカード決済が実行されます</span>
                                 </li>
                                 <li class="flex items-start">
                                     <span class="font-bold mr-2">3.</span>
@@ -82,8 +82,8 @@
                             <h4 class="font-bold text-red-900 text-sm mb-1">重要な注意事項</h4>
                             <ul class="text-xs text-red-800 space-y-1">
                                 <li>• 本人確認が完了していない場合、決済は実行されません</li>
-                                <li>• カード情報は安全に保管され、本人確認完了時にのみ使用されます</li>
-                                <li>• 登録したカードは後日マイページから変更可能です</li>
+                                <li>• クレジットカード情報は安全に保管され、本人確認完了時にのみ使用されます</li>
+                                <li>• 登録したクレジットカードは後日マイページから変更可能です</li>
                             </ul>
                         </div>
                     </div>

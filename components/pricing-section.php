@@ -84,6 +84,12 @@
                 </a>
             </div>
         </div>
+
+        <div class="text-center mb-16">
+            <p class="text-s text-gray-600">
+            早割の適用は、2025年12月15日23:59までに申込をし、本人登録・クレジットカード決済を2026年1月1日23:59までに完了した方が対象
+            </p>
+        </div>
         
         <div class="bg-white rounded-3xl p-8 shadow-lg max-w-4xl mx-auto mb-12">
             <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">安全な決済システム</h3>

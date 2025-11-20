@@ -299,7 +299,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                                 <i class="ri-error-warning-line text-2xl mr-3"></i>
                                 <div>
                                     <div class="text-lg font-bold">決済に失敗しました</div>
-                                    <p class="text-sm text-red-800 mt-1">カード情報を再登録のうえ、別のカードでお試しください。</p>
+                                    <p class="text-sm text-red-800 mt-1">クレジットカード情報を再登録のうえ、別のクレジットカードでお試しください。</p>
                                 </div>
                             </div>
                             <a
@@ -307,7 +307,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                                 class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
                             >
                                 <i class="ri-refresh-line mr-2"></i>
-                                カード情報を再登録する
+                                クレジットカード情報を再登録する
                             </a>
                             <p class="text-xs text-red-800 mt-3">
                                 <i class="ri-mail-line mr-1"></i>
@@ -329,7 +329,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                             <div class="flex items-center mb-2 text-blue-700">
                                 <i class="ri-information-line text-2xl mr-3"></i>
                                 <div>
-                                    <div class="text-lg font-bold">カード登録済み</div>
+                                    <div class="text-lg font-bold">クレジットカード登録済み</div>
                                     <p class="text-sm text-blue-900 mt-1">本人確認が完了すると自動的に決済されます。</p>
                                 </div>
                             </div>
@@ -342,8 +342,8 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                             <div class="flex items-center mb-3 text-yellow-700">
                                 <i class="ri-bank-card-line text-2xl mr-3"></i>
                                 <div>
-                                    <div class="text-lg font-bold">カード登録が必要です</div>
-                                    <p class="text-sm text-yellow-900 mt-1">以下のボタンからカード情報を登録してください。</p>
+                                    <div class="text-lg font-bold">クレジットカード登録が必要です</div>
+                                    <p class="text-sm text-yellow-900 mt-1">以下のボタンからクレジットカード情報を登録してください。</p>
                                 </div>
                             </div>
                             <a
@@ -351,7 +351,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                                 class="inline-flex items-center bg-gradient-blue-teal text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl"
                             >
                                 <i class="ri-bank-card-line mr-2"></i>
-                                カード情報を登録する
+                                クレジットカード情報を登録する
                             </a>
                             <?php if (!in_array($memberKycStatus, ['approved', 'completed'], true)): ?>
                             <div class="bg-white border border-yellow-200 rounded-lg p-4 mt-4 text-sm text-yellow-800">
@@ -368,7 +368,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                                 <div class="text-base font-semibold text-gray-900"><?php echo htmlspecialchars($memberKycLabel); ?></div>
                             </div>
                             <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                <div class="text-xs text-gray-500 mb-1">登録カード</div>
+                                <div class="text-xs text-gray-500 mb-1">登録クレジットカード</div>
                                 <?php if (!empty($teamMemberData['card_last4']) && !empty($teamMemberData['card_brand'])): ?>
                                     <div class="text-sm font-semibold text-gray-900">
                                         <?php echo htmlspecialchars($teamMemberData['card_brand']); ?> •••• <?php echo htmlspecialchars($teamMemberData['card_last4']); ?>
@@ -413,13 +413,13 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                                 <i class="ri-close-line text-red-600 text-4xl"></i>
                             </div>
                             <h4 class="text-2xl font-bold text-gray-900 mb-2">決済に失敗しました</h4>
-                            <p class="text-gray-700 mb-4">カード情報を再登録し、別のカードでお試しください。</p>
+                            <p class="text-gray-700 mb-4">クレジットカード情報を再登録し、別のクレジットカードでお試しください。</p>
                             <a
                                 href="../stripe-checkout-setup.php"
                                 class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
                             >
                                 <i class="ri-refresh-line mr-2"></i>
-                                カード情報を再登録する
+                                クレジットカード情報を再登録する
                             </a>
                             <p class="text-sm text-red-700 mt-4">
                                 <i class="ri-mail-line mr-1"></i>
@@ -437,16 +437,16 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                         </div>
 
                         <?php elseif ($cardRegistered): ?>
-                        <!-- カード登録済み・課金待ち -->
+                        <!-- クレジットカード登録済み・課金待ち -->
                         <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
                             <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <i class="ri-time-line text-blue-600 text-4xl"></i>
                             </div>
-                            <h4 class="text-2xl font-bold text-gray-900 mb-2">カード登録済み</h4>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">クレジットカード登録済み</h4>
                             <p class="text-gray-700 mb-4">本人確認完了後、自動的に決済が実行されます</p>
                             <?php if (!empty($application['card_last4']) && !empty($application['card_brand'])): ?>
                             <div class="bg-white rounded-lg p-4 inline-block">
-                                <div class="text-sm text-gray-600 mb-1">登録カード</div>
+                                <div class="text-sm text-gray-600 mb-1">登録クレジットカード</div>
                                 <div class="font-semibold text-gray-900">
                                     <?php echo htmlspecialchars($application['card_brand']); ?> •••• <?php echo htmlspecialchars($application['card_last4']); ?>
                                 </div>
@@ -468,7 +468,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                             $noteText = '決済は即座に実行されます';
                         } else {
                             $checkoutUrl = '../stripe-checkout-setup.php';
-                            $buttonText = 'カード情報を登録する';
+                            $buttonText = 'クレジットカード情報を登録する';
                             $buttonIcon = 'ri-bank-card-line';
                             $description = '参加費のお支払いのため、クレジットカード情報を登録してください';
                             $noteText = '本人確認完了後に自動的に決済されます';
@@ -480,7 +480,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                                 <i class="ri-alert-line text-yellow-600 text-4xl"></i>
                             </div>
                             <h4 class="text-2xl font-bold text-gray-900 mb-2">
-                                <?php echo $isKycCompleted ? 'お支払いが必要です' : 'カード登録が必要です'; ?>
+                                <?php echo $isKycCompleted ? 'お支払いが必要です' : 'クレジットカード登録が必要です'; ?>
                             </h4>
                             <p class="text-gray-700 mb-6"><?php echo $description; ?></p>
                             
@@ -491,7 +491,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                                     <i class="ri-time-line text-gray-600 text-xl mr-3 mt-0.5"></i>
                                     <div class="text-sm text-gray-700">
                                         <p class="font-semibold mb-1">本人確認は<?php echo htmlspecialchars($kycAvailableDateLabel ?? '近日中'); ?>開始予定です</p>
-                                        <p>カード登録のみ先に完了させていただき、本人確認は開始日以降に改めてご案内いたします。</p>
+                                        <p>クレジットカード登録のみ先に完了させていただき、本人確認は開始日以降に改めてご案内いたします。</p>
                                     </div>
                                 </div>
                             </div>
@@ -501,7 +501,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                                     <i class="ri-information-line text-red-600 text-xl mr-3 mt-0.5"></i>
                                     <div class="text-sm text-red-800">
                                         <p class="font-semibold mb-1">本人確認が完了していません</p>
-                                        <p>カード情報を登録後、本人確認（eKYC）が完了した時点で自動的に決済が実行されます。</p>
+                                        <p>クレジットカード情報を登録後、本人確認（eKYC）が完了した時点で自動的に決済が実行されます。</p>
                                     </div>
                                 </div>
                             </div>
@@ -527,7 +527,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
 
                 <!-- 料金詳細 -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div class="bg-brand-pink px-6 py-4">
+                    <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
                         <h3 class="text-xl font-bold text-white flex items-center">
                             <i class="ri-price-tag-3-line mr-2"></i>
                             料金詳細
@@ -573,7 +573,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                             <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">1</div>
                             <div>
                                 <div class="font-semibold text-gray-900 mb-1">クレジットカード情報の登録</div>
-                                <div class="text-sm text-gray-700">Stripe決済システムで安全にカード情報を登録します。この時点では課金されません。</div>
+                                <div class="text-sm text-gray-700">Stripe決済システムで安全にクレジットカード情報を登録します。この時点では課金されません。</div>
                             </div>
                         </div>
                         <div class="flex items-start">
@@ -587,7 +587,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                             <div class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">✓</div>
                             <div>
                                 <div class="font-semibold text-gray-900 mb-1">自動決済</div>
-                                <div class="text-sm text-gray-700">本人確認完了後、登録されたカードで自動的に決済されます。</div>
+                                <div class="text-sm text-gray-700">本人確認完了後、登録されたクレジットカードで自動的に決済されます。</div>
                             </div>
                         </div>
                     </div>
@@ -599,7 +599,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                         </h4>
                         <ul class="text-xs text-gray-700 space-y-1">
                             <li>• Stripe決済システムは国際セキュリティ基準PCI DSSに準拠しています</li>
-                            <li>• カード情報は暗号化され、安全に保管されます</li>
+                            <li>• クレジットカード情報は暗号化され、安全に保管されます</li>
                             <li>• 決済完了後、メールで通知をお送りします</li>
                         </ul>
                     </div>

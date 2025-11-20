@@ -31,4 +31,5 @@
 - `APP_URL` はメールに記載されるマイページ URL やカード登録リンク（`card_registration_url`）に直結します。環境ごとに正しいドメインに更新してください。
 - メール送信の検証時には `EMAIL_SANDBOX_MODE = true` にしておけば、実ユーザーには届かず `EMAIL_SANDBOX_RECIPIENT` にのみ転送されます。
 - Stripe はテスト鍵で実行するとテストダッシュボード側に、ライブ鍵で実行すると本番側にトランザクションが記録されます。鍵の切り替え忘れに注意してください。
+- `team_member_payment` を送信予約した場合は、`scripts/run-email-batches.php` を cron（例: 10分間隔）に登録しておくことで指定時刻に保護者宛リマインダーが自動送信されます。
 

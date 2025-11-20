@@ -327,26 +327,26 @@ function getKycStatusBadge($status) {
                 </div>
 
                 <!-- 試験情報カード -->
-                <div class="bg-brand-pink rounded-xl shadow-lg p-6 text-white">
-                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                <div class="bg-brand-blue rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center text-white">
                         <i class="ri-calendar-event-line mr-2"></i>
-                        試験日程
+                        選手権日程
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                            <i class="ri-calendar-line text-3xl mb-2"></i>
-                            <div class="text-sm mb-1">試験日</div>
-                            <div class="font-bold text-lg">2026年1月4日(日)</div>
+                        <div class="bg-white rounded-lg p-4 shadow-sm text-brand-blue">
+                            <i class="ri-calendar-line text-3xl mb-2 text-brand-blue"></i>
+                            <div class="text-sm mb-1 font-medium text-brand-blue">実施日</div>
+                            <div class="font-bold text-lg text-brand-blue">2026年1月4日(日)</div>
                         </div>
-                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                            <i class="ri-time-line text-3xl mb-2"></i>
-                            <div class="text-sm mb-1">開始時刻</div>
-                            <div class="font-bold text-lg">10:00</div>
+                        <div class="bg-white rounded-lg p-4 shadow-sm text-brand-blue">
+                            <i class="ri-time-line text-3xl mb-2 text-brand-blue"></i>
+                            <div class="text-sm mb-1 font-medium text-brand-blue">開始時刻</div>
+                            <div class="font-bold text-lg text-brand-blue">10:00</div>
                         </div>
-                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                            <i class="ri-timer-line text-3xl mb-2"></i>
-                            <div class="text-sm mb-1">試験時間</div>
-                            <div class="font-bold text-lg">60分</div>
+                        <div class="bg-white rounded-lg p-4 shadow-sm text-brand-blue">
+                            <i class="ri-timer-line text-3xl mb-2 text-brand-blue"></i>
+                            <div class="text-sm mb-1 font-medium text-brand-blue">実施時間</div>
+                            <div class="font-bold text-lg text-brand-blue">60分</div>
                         </div>
                     </div>
                 </div>
