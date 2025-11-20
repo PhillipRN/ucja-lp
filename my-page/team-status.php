@@ -197,25 +197,25 @@ try {
                 </div>
 
                 <!-- チーム情報カード -->
-                <div class="bg-brand-pink rounded-xl shadow-lg p-6 text-white">
-                    <h3 class="text-2xl font-bold mb-4 flex items-center">
+                <div class="bg-brand-blue rounded-xl shadow-lg p-6 text-white">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center ">
                         <i class="ri-team-line mr-2"></i>
                         <span id="team-name">読み込み中...</span>
                     </h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                        <div class="bg-white backdrop-blur-sm rounded-lg p-4 text-brand-blue">
                             <div class="text-sm mb-1">学校名</div>
                             <div class="font-semibold text-lg" id="team-school">-</div>
                         </div>
-                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                        <div class="bg-white backdrop-blur-sm rounded-lg p-4 text-brand-blue">
                             <div class="text-sm mb-1">メンバー数</div>
                             <div class="font-bold text-2xl">5名</div>
                         </div>
-                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                        <div class="bg-white backdrop-blur-sm rounded-lg p-4 text-brand-blue">
                             <div class="text-sm mb-1">チーム成立</div>
                             <div class="font-bold text-2xl" id="team-complete-status">-</div>
                         </div>
-                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                        <div class="bg-white backdrop-blur-sm rounded-lg p-4 text-brand-blue">
                             <div class="text-sm mb-1">チーム合計点</div>
                             <div class="font-bold text-3xl" id="team-total-score">-</div>
                         </div>

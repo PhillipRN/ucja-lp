@@ -27,15 +27,152 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../lib/SupabaseClient.php';
 require_once __DIR__ . '/../lib/EmailTemplateService.php';
 
+function sanitize_text(?string $value): string
+{
+    return trim((string)($value ?? ''));
+}
+
+function normalize_email_value(?string $value): string
+{
+    $normalized = strtolower(trim((string)($value ?? '')));
+    return $normalized;
+}
+
+function ensure_unique_participant_identity(
+    SupabaseClient $supabase,
+    string $name,
+    string $email,
+    string $label
+): void {
+    if ($email !== '') {
+        if (has_production_individual_match($supabase, 'student_email', $email) ||
+            has_production_team_member_match($supabase, 'member_email', $email)) {
+            throw new Exception("{$label}のメールアドレスは既に本番環境で使用されています。別のメールアドレスをご利用ください。");
+        }
+    }
+
+    if ($name !== '') {
+        if (has_production_individual_match($supabase, 'student_name', $name) ||
+            has_production_team_member_match($supabase, 'member_name', $name)) {
+            throw new Exception("{$label}の氏名は既に本番環境で使用されています。別の氏名をご確認ください。");
+        }
+    }
+}
+
+function has_production_individual_match(SupabaseClient $supabase, string $column, string $value): bool
+{
+    if ($value === '') {
+        return false;
+    }
+
+    $result = $supabase->from('individual_applications')
+        ->select('application_id')
+        ->eq($column, $value)
+        ->execute();
+
+    if (!$result['success']) {
+        throw new Exception('既存の個人申込データの確認に失敗しました。');
+    }
+
+    foreach ($result['data'] ?? [] as $row) {
+        if (is_production_application($supabase, $row['application_id'] ?? null)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function has_production_team_member_match(SupabaseClient $supabase, string $column, string $value): bool
+{
+    if ($value === '') {
+        return false;
+    }
+
+    $result = $supabase->from('team_members')
+        ->select('team_application_id')
+        ->eq($column, $value)
+        ->execute();
+
+    if (!$result['success']) {
+        throw new Exception('既存のチームメンバーデータの確認に失敗しました。');
+    }
+
+    foreach ($result['data'] ?? [] as $row) {
+        if (is_production_team_application($supabase, $row['team_application_id'] ?? null)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function is_production_team_application(SupabaseClient $supabase, ?string $teamApplicationId): bool
+{
+    static $cache = [];
+
+    if (empty($teamApplicationId)) {
+        return false;
+    }
+
+    if (array_key_exists($teamApplicationId, $cache)) {
+        return $cache[$teamApplicationId];
+    }
+
+    $result = $supabase->from('team_applications')
+        ->select('application_id')
+        ->eq('id', $teamApplicationId)
+        ->single();
+
+    if (!$result['success'] || empty($result['data'])) {
+        $cache[$teamApplicationId] = false;
+        return false;
+    }
+
+    $cache[$teamApplicationId] = is_production_application($supabase, $result['data']['application_id'] ?? null);
+    return $cache[$teamApplicationId];
+}
+
+function is_production_application(SupabaseClient $supabase, ?string $applicationId): bool
+{
+    static $cache = [];
+
+    if (empty($applicationId)) {
+        return false;
+    }
+
+    if (array_key_exists($applicationId, $cache)) {
+        return $cache[$applicationId];
+    }
+
+    $result = $supabase->from('applications')
+        ->select('environment, application_status')
+        ->eq('id', $applicationId)
+        ->single();
+
+    if (!$result['success'] || empty($result['data'])) {
+        $cache[$applicationId] = false;
+        return false;
+    }
+
+    $record = $result['data'];
+    $cache[$applicationId] = (
+        ($record['environment'] ?? 'development') === 'production' &&
+        ($record['application_status'] ?? '') !== 'cancelled'
+    );
+
+    return $cache[$applicationId];
+}
+
 try {
     // Supabaseクライアントの初期化
     $supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
     $emailTemplateService = new EmailTemplateService($supabase);
     
     // POSTデータの取得
-    $participationType = $_POST['participationType'] ?? '';
-    $pricingType = $_POST['pricingType'] ?? '';
-    $specialRequests = $_POST['specialRequests'] ?? '';
+    $participationType = sanitize_text($_POST['participationType'] ?? '');
+    $pricingType = sanitize_text($_POST['pricingType'] ?? '');
+    $specialRequests = sanitize_text($_POST['specialRequests'] ?? '');
     
     // 参加形式のバリデーション
     if (empty($participationType)) {
@@ -55,11 +192,132 @@ try {
         $amount = REGULAR_PRICE;
     }
     
+    $isIndividual = ($participationType === '個人戦');
+    $participantName = '';
+    $guardianName = '';
+    $guardianEmail = '';
+    $teamName = '';
+    $individualPayload = null;
+    $teamPayload = null;
+    $teamMembersPayload = [];
+    $memberEmails = [];
+    $loginRecipients = [];
+    $addRecipient = function (?string $email, ?string $name = null) use (&$loginRecipients) {
+        $email = trim(strtolower($email ?? ''));
+        if (empty($email)) {
+            return;
+        }
+        $loginRecipients[$email] = [
+            'email' => $email,
+            'name' => $name ?: ''
+        ];
+    };
+    
+    if ($isIndividual) {
+        $studentName = sanitize_text($_POST['studentName'] ?? '');
+        $schoolName = sanitize_text($_POST['school'] ?? '');
+        $grade = sanitize_text($_POST['grade'] ?? '');
+        $studentEmail = normalize_email_value($_POST['email'] ?? '');
+        $studentPhone = sanitize_text($_POST['phone'] ?? '');
+        $guardianNameValue = sanitize_text($_POST['guardianName'] ?? '');
+        $guardianEmailValue = normalize_email_value($_POST['guardianEmail'] ?? '');
+        $guardianPhone = sanitize_text($_POST['guardianPhone'] ?? '');
+        
+        $individualPayload = [
+            'student_name' => $studentName,
+            'school' => $schoolName,
+            'grade' => $grade,
+            'student_email' => $studentEmail,
+            'student_phone' => $studentPhone,
+            'guardian_name' => $guardianNameValue,
+            'guardian_email' => $guardianEmailValue,
+            'guardian_phone' => $guardianPhone
+        ];
+        
+        $requiredFields = ['student_name', 'school', 'grade', 'student_email', 'student_phone', 'guardian_name', 'guardian_email', 'guardian_phone'];
+        foreach ($requiredFields as $field) {
+            if (empty($individualPayload[$field])) {
+                throw new Exception('必須項目が入力されていません: ' . $field);
+            }
+        }
+        
+        ensure_unique_participant_identity($supabase, $studentName, $studentEmail, '個人戦の参加者');
+        
+        $participantName = $studentName;
+        $guardianName = $guardianNameValue;
+        $guardianEmail = $guardianEmailValue;
+        $teamName = '';
+        
+        $addRecipient($studentEmail, $studentName);
+        $addRecipient($guardianEmailValue, $guardianNameValue);
+    } else {
+        $teamNameValue = sanitize_text($_POST['teamName'] ?? '');
+        $teamSchool = sanitize_text($_POST['school-team'] ?? '');
+        $guardianNameTeam = sanitize_text($_POST['guardianName-team'] ?? '');
+        $guardianEmailTeam = normalize_email_value($_POST['guardianEmail-team'] ?? '');
+        $guardianPhoneTeam = sanitize_text($_POST['guardianPhone-team'] ?? '');
+        
+        $teamPayload = [
+            'team_name' => $teamNameValue,
+            'school' => $teamSchool,
+            'guardian_name' => $guardianNameTeam,
+            'guardian_email' => $guardianEmailTeam,
+            'guardian_phone' => $guardianPhoneTeam
+        ];
+        
+        $requiredFields = ['team_name', 'school', 'guardian_name', 'guardian_email', 'guardian_phone'];
+        foreach ($requiredFields as $field) {
+            if (empty($teamPayload[$field])) {
+                throw new Exception('必須項目が入力されていません: ' . $field);
+            }
+        }
+        
+        $seenMemberEmails = [];
+        $seenMemberNames = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $memberName = sanitize_text($_POST["member{$i}Name"] ?? '');
+            $memberEmail = normalize_email_value($_POST["member{$i}Email"] ?? '');
+            
+            if (empty($memberName) || empty($memberEmail)) {
+                throw new Exception("メンバー{$i}の情報が入力されていません");
+            }
+            
+            if (isset($seenMemberEmails[$memberEmail])) {
+                throw new Exception("メンバー間で同じメールアドレスは使用できません: {$memberEmail}");
+            }
+            if (isset($seenMemberNames[$memberName])) {
+                throw new Exception("メンバー間で同じ氏名は使用できません: {$memberName}");
+            }
+            
+            $seenMemberEmails[$memberEmail] = true;
+            $seenMemberNames[$memberName] = true;
+            
+            ensure_unique_participant_identity($supabase, $memberName, $memberEmail, "チームメンバー{$i}");
+            
+            $teamMembersPayload[] = [
+                'member_number' => $i,
+                'member_name' => $memberName,
+                'member_email' => $memberEmail,
+                'is_representative' => ($i === 1)
+            ];
+            
+            $memberEmails[] = $memberEmail;
+            $addRecipient($memberEmail, $memberName);
+        }
+        
+        $participantName = $teamNameValue;
+        $guardianName = $guardianNameTeam;
+        $guardianEmail = $guardianEmailTeam;
+        $teamName = $teamNameValue;
+        
+        $addRecipient($guardianEmailTeam, $guardianNameTeam);
+    }
+    
     // トランザクション開始（複数テーブルへの挿入）
     
     // 1. Applicationレコードの作成
     $applicationData = [
-        'participation_type' => $participationType === '個人戦' ? 'individual' : 'team',
+        'participation_type' => $isIndividual ? 'individual' : 'team',
         'pricing_type' => $pricingType,
         'amount' => $amount,
         'payment_status' => 'pending',
@@ -84,40 +342,9 @@ try {
     error_log('application_id: ' . $applicationId);
     error_log('application_number: ' . $applicationNumber);
     
-    $loginRecipients = [];
-    $addRecipient = function (?string $email, ?string $name = null) use (&$loginRecipients) {
-        $email = trim(strtolower($email ?? ''));
-        if (empty($email)) {
-            return;
-        }
-        $loginRecipients[$email] = [
-            'email' => $email,
-            'name' => $name ?: ''
-        ];
-    };
-    
     // 2. 個人戦 or チーム戦の詳細データを保存
-    if ($participationType === '個人戦') {
-        // 個人戦の処理
-        $individualData = [
-            'application_id' => $applicationId,
-            'student_name' => $_POST['studentName'] ?? '',
-            'school' => $_POST['school'] ?? '',
-            'grade' => $_POST['grade'] ?? '',
-            'student_email' => $_POST['email'] ?? '',
-            'student_phone' => $_POST['phone'] ?? '',
-            'guardian_name' => $_POST['guardianName'] ?? '',
-            'guardian_email' => $_POST['guardianEmail'] ?? '',
-            'guardian_phone' => $_POST['guardianPhone'] ?? ''
-        ];
-        
-        // バリデーション
-        $requiredFields = ['student_name', 'school', 'grade', 'student_email', 'guardian_name', 'guardian_email', 'guardian_phone'];
-        foreach ($requiredFields as $field) {
-            if (empty($individualData[$field])) {
-                throw new Exception('必須項目が入力されていません: ' . $field);
-            }
-        }
+    if ($isIndividual) {
+        $individualData = array_merge(['application_id' => $applicationId], $individualPayload);
         
         $individualResult = $supabase->insert('individual_applications', $individualData);
         
@@ -126,8 +353,6 @@ try {
         }
         
         $guardianEmail = $individualData['guardian_email'];
-        $addRecipient($individualData['student_email'] ?? '', $individualData['student_name'] ?? '');
-        $addRecipient($guardianEmail ?? '', $individualData['guardian_name'] ?? '');
         $responseData = [
             'success' => true,
             'application_id' => $applicationId,
@@ -137,28 +362,8 @@ try {
             'student_email' => $individualData['student_email'],
             'guardian_email' => $individualData['guardian_email']
         ];
-        $participantName = $individualData['student_name'];
-        $guardianName = $individualData['guardian_name'];
-        $teamName = '';
-        
     } else {
-        // チーム戦の処理
-        $teamData = [
-            'application_id' => $applicationId,
-            'team_name' => $_POST['teamName'] ?? '',
-            'school' => $_POST['school-team'] ?? '',
-            'guardian_name' => $_POST['guardianName-team'] ?? '',
-            'guardian_email' => $_POST['guardianEmail-team'] ?? '',
-            'guardian_phone' => $_POST['guardianPhone-team'] ?? ''
-        ];
-        
-        // バリデーション
-        $requiredFields = ['team_name', 'school', 'guardian_name', 'guardian_email', 'guardian_phone'];
-        foreach ($requiredFields as $field) {
-            if (empty($teamData[$field])) {
-                throw new Exception('必須項目が入力されていません: ' . $field);
-            }
-        }
+        $teamData = array_merge(['application_id' => $applicationId], $teamPayload);
         
         $teamResult = $supabase->insert('team_applications', $teamData);
         
@@ -168,36 +373,19 @@ try {
         
         $teamApplicationId = $teamResult['data'][0]['id'];
         
-        // チームメンバーの登録
-        $memberEmails = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $memberName = $_POST["member{$i}Name"] ?? '';
-            $memberEmail = $_POST["member{$i}Email"] ?? '';
+        foreach ($teamMembersPayload as $memberData) {
+            $memberInsertData = array_merge($memberData, [
+                'team_application_id' => $teamApplicationId
+            ]);
             
-            if (empty($memberName) || empty($memberEmail)) {
-                throw new Exception("メンバー{$i}の情報が入力されていません");
-            }
-            
-            $memberData = [
-                'team_application_id' => $teamApplicationId,
-                'member_number' => $i,
-                'member_name' => $memberName,
-                'member_email' => $memberEmail,
-                'is_representative' => ($i === 1)
-            ];
-            
-            $memberResult = $supabase->insert('team_members', $memberData);
+            $memberResult = $supabase->insert('team_members', $memberInsertData);
             
             if (!$memberResult['success']) {
-                throw new Exception("メンバー{$i}の登録に失敗しました");
+                throw new Exception("メンバー{$memberData['member_number']}の登録に失敗しました");
             }
-            
-            $memberEmails[] = $memberEmail;
-            $addRecipient($memberEmail, $memberName);
         }
         
         $guardianEmail = $teamData['guardian_email'];
-        $addRecipient($guardianEmail ?? '', $teamData['guardian_name'] ?? '');
         $responseData = [
             'success' => true,
             'application_id' => $applicationId,
@@ -208,9 +396,6 @@ try {
             'member_emails' => $memberEmails,
             'guardian_email' => $teamData['guardian_email']
         ];
-        $participantName = $teamData['team_name'];
-        $guardianName = $teamData['guardian_name'];
-        $teamName = $teamData['team_name'];
     }
     
     // 3. メール送信

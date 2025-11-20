@@ -72,35 +72,38 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     生徒氏名
                                 </label>
-                                <input
-                                    type="text"
-                                    name="studentName"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                    placeholder="山田太郎"
-                                />
+                            <input
+                                type="text"
+                                name="studentName"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                placeholder="山田太郎"
+                                required
+                            />
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     学校名
                                 </label>
-                                <input
-                                    type="text"
-                                    name="school"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                    placeholder="○○高等学校"
-                                />
+                            <input
+                                type="text"
+                                name="school"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                placeholder="○○高等学校"
+                                required
+                            />
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     学年
                                 </label>
-                                <select
-                                    name="grade"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm pr-8"
-                                >
-                                    <option value="">選択してください</option>
+                            <select
+                                name="grade"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm pr-8"
+                                required
+                            >
+                                <option value="" disabled selected>選択してください</option>
                                     <option value="1年生">1年生</option>
                                     <option value="2年生">2年生</option>
                                     <option value="3年生">3年生</option>
@@ -111,60 +114,65 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     生徒メールアドレス
                                 </label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                    placeholder="student@example.com"
-                                />
+                            <input
+                                type="email"
+                                name="email"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                placeholder="student@example.com"
+                                required
+                            />
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     生徒電話番号
                                 </label>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                    placeholder="090-1234-5678"
-                                />
+                            <input
+                                type="tel"
+                                name="phone"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                placeholder="090-1234-5678"
+                                required
+                            />
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     保護者氏名
                                 </label>
-                                <input
-                                    type="text"
-                                    name="guardianName"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                    placeholder="山田花子"
-                                />
+                            <input
+                                type="text"
+                                name="guardianName"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                placeholder="山田花子"
+                                required
+                            />
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     保護者メールアドレス
                                 </label>
-                                <input
-                                    type="email"
-                                    name="guardianEmail"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                    placeholder="parent@example.com"
-                                />
+                            <input
+                                type="email"
+                                name="guardianEmail"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                placeholder="parent@example.com"
+                                required
+                            />
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     保護者電話番号
                                 </label>
-                                <input
-                                    type="tel"
-                                    name="guardianPhone"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                    placeholder="090-1234-5678"
-                                />
+                            <input
+                                type="tel"
+                                name="guardianPhone"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                placeholder="090-1234-5678"
+                                required
+                            />
                             </div>
                             
                             
@@ -203,6 +211,7 @@
                                     maxlength="10"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                     placeholder="○○高校Aチーム"
+                                    required
                                 />
                                 <p class="text-xs text-gray-500 mt-1">※10文字まで</p>
                             </div>
@@ -225,6 +234,7 @@
                                             name="member1Name"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                                             placeholder="山田太郎"
+                                            required
                                         />
                                     </div>
                                     <div>
@@ -236,6 +246,7 @@
                                             name="member1Email"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                                             placeholder="member1@example.com"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -254,6 +265,7 @@
                                             name="member2Name"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                                             placeholder="佐藤花子"
+                                            required
                                         />
                                     </div>
                                     <div>
@@ -265,6 +277,7 @@
                                             name="member2Email"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                                             placeholder="member2@example.com"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -283,6 +296,7 @@
                                             name="member3Name"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                                             placeholder="田中次郎"
+                                            required
                                         />
                                     </div>
                                     <div>
@@ -294,6 +308,7 @@
                                             name="member3Email"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                                             placeholder="member3@example.com"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -312,6 +327,7 @@
                                             name="member4Name"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                                             placeholder="鈴木一郎"
+                                            required
                                         />
                                     </div>
                                     <div>
@@ -323,6 +339,7 @@
                                             name="member4Email"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                                             placeholder="member4@example.com"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -341,6 +358,7 @@
                                             name="member5Name"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                                             placeholder="高橋美咲"
+                                            required
                                         />
                                     </div>
                                     <div>
@@ -352,6 +370,7 @@
                                             name="member5Email"
                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                                             placeholder="member5@example.com"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -371,6 +390,7 @@
                                     name="guardianName-team"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                     placeholder="山田花子"
+                                    required
                                 />
                             </div>
                             
@@ -383,6 +403,7 @@
                                     name="guardianEmail-team"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                     placeholder="parent@example.com"
+                                    required
                                 />
                             </div>
                             
@@ -395,6 +416,7 @@
                                     name="guardianPhone-team"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                     placeholder="090-1234-5678"
+                                    required
                                 />
                             </div>
 
@@ -408,6 +430,7 @@
                                     name="school-team"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                     placeholder="○○高等学校"
+                                    required
                                 />
                             </div>
 
@@ -722,6 +745,7 @@
                                             name="pricingType"
                                             value="早割 8,800円（2025年12月15日締切）"
                                             class="mr-4"
+                                            required
                                         />
                                         <div class="flex-1">
                                             <div class="flex items-center justify-between">
@@ -875,6 +899,61 @@
 </section>
 
 <script>
+const individualRequiredFields = [
+    'studentName',
+    'school',
+    'grade',
+    'email',
+    'phone',
+    'guardianName',
+    'guardianEmail',
+    'guardianPhone'
+];
+
+const teamRequiredFields = [
+    'teamName',
+    'member1Name',
+    'member1Email',
+    'member2Name',
+    'member2Email',
+    'member3Name',
+    'member3Email',
+    'member4Name',
+    'member4Email',
+    'member5Name',
+    'member5Email',
+    'guardianName-team',
+    'guardianEmail-team',
+    'guardianPhone-team',
+    'school-team'
+];
+
+function toggleRequiredFields(mode) {
+    individualRequiredFields.forEach(name => {
+        const field = document.querySelector(`[name="${name}"]`);
+        if (!field) return;
+        if (mode === 'individual') {
+            field.setAttribute('required', 'required');
+        } else {
+            field.removeAttribute('required');
+        }
+    });
+
+    teamRequiredFields.forEach(name => {
+        const field = document.querySelector(`[name="${name}"]`);
+        if (!field) return;
+        if (mode === 'team') {
+            field.setAttribute('required', 'required');
+        } else {
+            field.removeAttribute('required');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    toggleRequiredFields('individual');
+});
+
 // 文字カウント更新
 function updateCharCount(textareaId, counterId) {
     const textarea = document.getElementById(textareaId);
@@ -905,6 +984,7 @@ function switchTab(tabType) {
         
         // 参加形式の値を更新
         participationTypeInput.value = '個人戦';
+        toggleRequiredFields('individual');
     } else if (tabType === 'team') {
         // チーム戦タブをアクティブに
         teamTab.classList.remove('text-gray-500', 'border-transparent');
@@ -918,6 +998,7 @@ function switchTab(tabType) {
         
         // 参加形式の値を更新
         participationTypeInput.value = '団体戦';
+        toggleRequiredFields('team');
     }
 }
 
@@ -985,35 +1066,38 @@ function displayTeamConfirmation(formData) {
     document.getElementById('confirm-individual').style.display = 'none';
     document.getElementById('confirm-team').style.display = 'block';
     
-    // データを表示
-    document.getElementById('confirm-participationType-team').textContent = formData.get('participationType') || '';
-    document.getElementById('confirm-teamName').textContent = formData.get('teamName') || '';
-    document.getElementById('confirm-school-team').textContent = formData.get('school-team') || '';
+    const safeSetText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = value || '';
+        }
+    };
     
-    // メンバー情報
-    document.getElementById('confirm-member1Name').textContent = formData.get('member1Name') || '';
-    document.getElementById('confirm-member1Email').textContent = formData.get('member1Email') || '';
-    document.getElementById('confirm-member2Name').textContent = formData.get('member2Name') || '';
-    document.getElementById('confirm-member2Email').textContent = formData.get('member2Email') || '';
-    document.getElementById('confirm-member3Name').textContent = formData.get('member3Name') || '';
-    document.getElementById('confirm-member3Email').textContent = formData.get('member3Email') || '';
-    document.getElementById('confirm-member4Name').textContent = formData.get('member4Name') || '';
-    document.getElementById('confirm-member4Email').textContent = formData.get('member4Email') || '';
-    document.getElementById('confirm-member5Name').textContent = formData.get('member5Name') || '';
-    document.getElementById('confirm-member5Email').textContent = formData.get('member5Email') || '';
+    safeSetText('confirm-participationType-team', formData.get('participationType'));
+    safeSetText('confirm-teamName', formData.get('teamName'));
+    safeSetText('confirm-school-team', formData.get('school-team'));
     
-    // 保護者情報
-    document.getElementById('confirm-guardianName-team').textContent = formData.get('guardianName-team') || '';
-    document.getElementById('confirm-guardianEmail-team').textContent = formData.get('guardianEmail-team') || '';
-    document.getElementById('confirm-guardianPhone-team').textContent = formData.get('guardianPhone-team') || '';
+    for (let i = 1; i <= 5; i++) {
+        safeSetText(`confirm-member${i}Name`, formData.get(`member${i}Name`));
+        safeSetText(`confirm-member${i}Email`, formData.get(`member${i}Email`));
+    }
+    
+    safeSetText('confirm-guardianName-team', formData.get('guardianName-team'));
+    safeSetText('confirm-guardianEmail-team', formData.get('guardianEmail-team'));
+    safeSetText('confirm-guardianPhone-team', formData.get('guardianPhone-team'));
     
     const specialRequests = formData.get('specialRequests-team') || '';
-    if (specialRequests) {
-        document.getElementById('confirm-specialRequests-team').textContent = specialRequests;
-        document.getElementById('confirm-specialRequests-team-wrapper').style.display = 'block';
-    } else {
-        document.getElementById('confirm-specialRequests-team').textContent = '（未入力）';
-        document.getElementById('confirm-specialRequests-team-wrapper').style.display = 'none';
+    const specialRequestsEl = document.getElementById('confirm-specialRequests-team');
+    const specialRequestsWrapper = document.getElementById('confirm-specialRequests-team-wrapper');
+    
+    if (specialRequestsEl && specialRequestsWrapper) {
+        if (specialRequests) {
+            specialRequestsEl.textContent = specialRequests;
+            specialRequestsWrapper.style.display = 'block';
+        } else {
+            specialRequestsEl.textContent = '（未入力）';
+            specialRequestsWrapper.style.display = 'none';
+        }
     }
 }
 

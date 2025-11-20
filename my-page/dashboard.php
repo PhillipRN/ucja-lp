@@ -25,6 +25,10 @@ $displayName = '';
 $isStudent = false; // 生徒本人かどうか
 $isGuardian = false; // 保護者かどうか
 $isMember = false; // チームメンバーかどうか
+$teamMembers = [];
+$currentMember = null;
+$application = null;
+$detail = null;
 
 try {
     // 申込情報取得
@@ -97,6 +101,7 @@ try {
                     if ($normalizedMemberEmail === $normalizedLoginEmail) {
                         $displayName = $member['member_name'];
                         $isMember = true;
+                        $currentMember = $member;
                         break;
                     }
                 }
@@ -106,6 +111,23 @@ try {
     
 } catch (Exception $e) {
     $error = $e->getMessage();
+}
+
+// 支払い・KYC ステータス（表示用）を決定
+$paymentStatusDisplay = $application['payment_status'] ?? 'pending';
+$kycStatusDisplay = $application['kyc_status'] ?? 'pending';
+
+if ($participationType === 'team' && $isMember && $currentMember) {
+    $memberPaymentStatus = $currentMember['payment_status'] ?? 'pending';
+    $memberCardRegistered = !empty($currentMember['card_registered']);
+
+    if ($memberPaymentStatus === 'pending' && $memberCardRegistered) {
+        $paymentStatusDisplay = 'card_registered';
+    } else {
+        $paymentStatusDisplay = $memberPaymentStatus ?: 'pending';
+    }
+
+    $kycStatusDisplay = $currentMember['kyc_status'] ?? 'pending';
 }
 
 // ステータスの日本語変換
@@ -129,6 +151,8 @@ function getPaymentStatusBadge($status) {
         'card_registered' => '<span class="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold"><i class="ri-bank-card-line mr-1"></i>カード登録済み</span>',
         'completed' => '<span class="inline-flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold"><i class="ri-check-line mr-1"></i>支払い完了</span>',
         'failed' => '<span class="inline-flex items-center bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold"><i class="ri-error-warning-line mr-1"></i>支払い失敗</span>',
+        'scheduled' => '<span class="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold"><i class="ri-calendar-check-line mr-1"></i>決済予約済み</span>',
+        'processing' => '<span class="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold"><i class="ri-loader-line mr-1"></i>決済処理中</span>',
     ];
     return $badges[$status] ?? $status;
 }
@@ -318,12 +342,12 @@ function getKycStatusBadge($status) {
                             </div>
                             <div class="text-center">
                                 <div class="text-gray-600 text-sm mb-2">支払い状況</div>
-                                <?php echo getPaymentStatusBadge($application['payment_status'] ?? 'pending'); ?>
+                                <?php echo getPaymentStatusBadge($paymentStatusDisplay); ?>
                             </div>
                             <?php if (!$isGuardian): ?>
                             <div class="text-center">
                                 <div class="text-gray-600 text-sm mb-2">本人確認状況</div>
-                                <?php echo getKycStatusBadge($application['kyc_status'] ?? 'pending'); ?>
+                                <?php echo getKycStatusBadge($kycStatusDisplay); ?>
                             </div>
                             <?php endif; ?>
                         </div>
@@ -362,7 +386,7 @@ function getKycStatusBadge($status) {
                         必要なアクション
                     </h3>
                     
-                    <?php if (!$isGuardian && $application['kyc_status'] === 'pending'): ?>
+                    <?php if (!$isGuardian && $kycStatusDisplay === 'pending'): ?>
                     <div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                         <div class="flex items-start justify-between">
                             <div class="flex items-start">
@@ -382,7 +406,7 @@ function getKycStatusBadge($status) {
                     </div>
                     <?php endif; ?>
 
-                    <?php if ($application['payment_status'] === 'pending'): ?>
+                    <?php if ($paymentStatusDisplay === 'pending'): ?>
                     <div class="mb-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
                         <div class="flex items-start justify-between">
                             <div class="flex items-start">
