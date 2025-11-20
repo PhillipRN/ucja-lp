@@ -84,6 +84,18 @@ try {
     error_log('application_id: ' . $applicationId);
     error_log('application_number: ' . $applicationNumber);
     
+    $loginRecipients = [];
+    $addRecipient = function (?string $email, ?string $name = null) use (&$loginRecipients) {
+        $email = trim(strtolower($email ?? ''));
+        if (empty($email)) {
+            return;
+        }
+        $loginRecipients[$email] = [
+            'email' => $email,
+            'name' => $name ?: ''
+        ];
+    };
+    
     // 2. 個人戦 or チーム戦の詳細データを保存
     if ($participationType === '個人戦') {
         // 個人戦の処理
@@ -114,6 +126,8 @@ try {
         }
         
         $guardianEmail = $individualData['guardian_email'];
+        $addRecipient($individualData['student_email'] ?? '', $individualData['student_name'] ?? '');
+        $addRecipient($guardianEmail ?? '', $individualData['guardian_name'] ?? '');
         $responseData = [
             'success' => true,
             'application_id' => $applicationId,
@@ -179,9 +193,11 @@ try {
             }
             
             $memberEmails[] = $memberEmail;
+            $addRecipient($memberEmail, $memberName);
         }
         
         $guardianEmail = $teamData['guardian_email'];
+        $addRecipient($guardianEmail ?? '', $teamData['guardian_name'] ?? '');
         $responseData = [
             'success' => true,
             'application_id' => $applicationId,
@@ -218,6 +234,32 @@ try {
         );
     } catch (Exception $mailException) {
         error_log('[submit-application] メール送信に失敗しました: ' . $mailException->getMessage());
+    }
+    
+    // 追加: カード登録案内をログイン可能な全メール宛に送付
+    try {
+        if (!empty($loginRecipients)) {
+            $cardVariablesBase = [
+                'application_number' => $applicationNumber,
+                'participation_type' => $participationType,
+                'team_name' => $teamName,
+                'participant_name' => $participantName,
+                'card_registration_url' => rtrim(APP_URL, '/') . '/stripe-checkout-setup.php',
+            ];
+            foreach ($loginRecipients as $recipient) {
+                $cardVariables = $cardVariablesBase;
+                $cardVariables['guardian_name'] = $recipient['name'] ?: $guardianName;
+                
+                $emailTemplateService->sendTemplate(
+                    'card_registration',
+                    $recipient,
+                    $cardVariables,
+                    ['application_id' => $applicationId]
+                );
+            }
+        }
+    } catch (Exception $cardMailException) {
+        error_log('[submit-application] カード登録案内メール送信に失敗しました: ' . $cardMailException->getMessage());
     }
     
     // 成功レスポンス
