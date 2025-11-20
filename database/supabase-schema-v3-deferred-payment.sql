@@ -624,7 +624,7 @@ BEGIN
     FROM applications
     WHERE application_number LIKE prefix || '-' || year_str || '-' || month_str || '-%';
     
-    new_number := FORMAT('%s-%s-%s-%06d', prefix, year_str, month_str, seq_num);
+    new_number := prefix || '-' || year_str || '-' || month_str || '-' || LPAD(seq_num::TEXT, 6, '0');
     NEW.application_number := new_number;
     
     RETURN NEW;
