@@ -1202,7 +1202,17 @@ function handleFinalSubmit(e) {
             sessionStorage.setItem('amount', data.amount);
             
             // ログイン情報もセッションストレージに保存
-            sessionStorage.setItem('application_email', data.student_email || data.guardian_email);
+            const loginEmails = [];
+            if (data.guardian_email) loginEmails.push(data.guardian_email);
+            if (data.student_email) loginEmails.push(data.student_email);
+            if (Array.isArray(data.member_emails)) {
+                data.member_emails.forEach(email => {
+                    if (email) loginEmails.push(email);
+                });
+            }
+            const uniqueEmails = [...new Set(loginEmails.filter(Boolean))];
+            sessionStorage.setItem('application_emails', JSON.stringify(uniqueEmails));
+            sessionStorage.setItem('application_email', uniqueEmails[0] || '');
             sessionStorage.setItem('participation_type', data.participation_type);
             
             // 確認ログ

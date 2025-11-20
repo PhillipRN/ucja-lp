@@ -85,11 +85,11 @@
                             <!-- メールアドレス -->
                             <div class="bg-white rounded-lg p-6 shadow-md">
                                 <div class="text-sm text-gray-600 mb-2">ログイン用メールアドレス</div>
-                                <div class="font-semibold text-lg text-gray-900" id="display-email">
-                                    読み込み中...
+                                <div id="display-email-list" class="space-y-2">
+                                    <div class="text-gray-500">読み込み中...</div>
                                 </div>
                                 <div class="text-xs text-gray-500 mt-2">
-                                    申込時に入力されたメールアドレス
+                                    マイページにログインできるメールアドレス一覧
                                 </div>
                             </div>
 
@@ -207,17 +207,51 @@
     <script>
     // sessionStorageから申込情報を取得
     const applicationNumber = sessionStorage.getItem('application_number');
-    const email = sessionStorage.getItem('application_email');
+    const emailListJson = sessionStorage.getItem('application_emails');
+    const legacyEmail = sessionStorage.getItem('application_email');
     const participationType = sessionStorage.getItem('participation_type');
 
     // 情報が存在しない場合はトップページにリダイレクト
-    if (!applicationNumber || !email) {
+    if (!applicationNumber) {
         alert('申込情報が見つかりません。トップページに戻ります。');
         window.location.href = 'index.php';
     } else {
         // 情報を表示
         document.getElementById('display-application-number').textContent = applicationNumber;
-        document.getElementById('display-email').textContent = email;
+        const emailListEl = document.getElementById('display-email-list');
+        let emails = [];
+        if (emailListJson) {
+            try {
+                emails = JSON.parse(emailListJson);
+            } catch (error) {
+                console.warn('メールリストの解析に失敗しました', error);
+            }
+        }
+        if ((!emails || emails.length === 0) && legacyEmail) {
+            emails = [legacyEmail];
+        }
+        if (!emails || emails.length === 0) {
+            const emptyEl = document.createElement('div');
+            emptyEl.className = 'text-gray-500';
+            emptyEl.textContent = 'メールアドレスを取得できませんでした。';
+            emailListEl.replaceChildren(emptyEl);
+        } else {
+            emailListEl.replaceChildren(
+                ...emails.map((addr, idx) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-4 py-2';
+                    const label = document.createElement('div');
+                    label.className = 'text-sm text-gray-500';
+                    label.textContent = `ログイン可能メール ${idx + 1}`;
+                    const value = document.createElement('div');
+                    value.className = 'font-semibold text-gray-900';
+                    value.textContent = addr;
+                    wrapper.appendChild(label);
+                    wrapper.appendChild(value);
+                    return wrapper;
+                })
+            );
+        }
         
         const participationTypeText = participationType === 'individual' ? '個人戦' : 'チーム戦';
         document.getElementById('display-participation-type').textContent = participationTypeText;
