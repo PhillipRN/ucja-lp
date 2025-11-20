@@ -112,12 +112,12 @@ include __DIR__ . '/components/header.php';
                         </button>
                         <button type="button" onclick="switchTab('html')" 
                             id="tabHtml" 
-                            class="px-4 py-2 font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-800">
+                            class="px-4 py-2 font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-800 hidden">
                             HTML版
                         </button>
                         <button type="button" onclick="switchTab('preview')" 
                             id="tabPreview" 
-                            class="px-4 py-2 font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-800">
+                            class="px-4 py-2 font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-800 hidden">
                             プレビュー
                         </button>
                     </div>
@@ -358,9 +358,9 @@ function renderTemplates() {
             description: '申込から決済までの自動送信メール'
         },
         'exam_related': {
-            label: '📅 試験関連（リマインダー）',
+            label: '📅 選手権関連（リマインダー）',
             color: 'purple',
-            description: '試験日程に関するメール'
+            description: '選手権実施日程に関するメール'
         },
         'announcements': {
             label: '📢 運営からのお知らせ（手動送信）',
@@ -368,9 +368,9 @@ function renderTemplates() {
             description: '管理画面から手動で送信するメール'
         },
         'post_exam': {
-            label: '🏆 試験後',
+            label: '🏆 選手権後',
             color: 'green',
-            description: '試験終了後に送信するメール'
+            description: '選手権終了後に送信するメール'
         }
     };
 
@@ -382,9 +382,9 @@ function renderTemplates() {
         'kyc_completed': '本人確認完了通知',
         'payment_confirmation': '決済完了通知',
         'payment_failed': '決済エラー通知',
-        'exam_reminder': '試験日リマインダー',
+        'exam_reminder': '選手権実施日リマインダー',
         'general_announcement': '汎用お知らせ',
-        'schedule_change': '試験日程変更通知',
+        'schedule_change': '選手権実施日程変更通知',
         'result_announcement': '結果発表通知'
     };
 

@@ -209,7 +209,7 @@
                                     </div>
                                     <ul class="text-sm text-gray-700 space-y-1 ml-6">
                                         <li>• 国際的なセキュリティ基準PCI DSS準拠</li>
-                                        <li>• カード情報は暗号化され安全に処理されます</li>
+                                        <li>• クレジットカード情報は暗号化され安全に処理されます</li>
                                         <li>• 決済手数料は不要です</li>
                                         <li>• 申込時に即座に決済完了</li>
                                     </ul>
@@ -250,7 +250,7 @@
                     <div class="p-8">
                         <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
                             <p class="text-gray-700 mb-4">
-                                本サービスは英語検定試験への参加申込となりますので、<strong>原則として返品・キャンセルはお受けできません。</strong>
+                                本サービスは英単語選手権への参加申込となりますので、<strong>原則として返品・キャンセルはお受けできません。</strong>
                             </p>
                         </div>
                         
@@ -260,13 +260,13 @@
                                 <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <i class="ri-check-line text-blue-600 text-sm"></i>
                                 </div>
-                                <span class="text-gray-700">天災、その他やむを得ない事情により試験が中止された場合</span>
+                                <span class="text-gray-700">天災、その他やむを得ない事情により選手権が中止された場合</span>
                             </div>
                             <div class="flex items-start space-x-3 bg-gray-50 rounded-lg p-4">
                                 <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <i class="ri-check-line text-blue-600 text-sm"></i>
                                 </div>
-                                <span class="text-gray-700">当社の都合により試験が中止された場合</span>
+                                <span class="text-gray-700">当社の都合により選手権が中止された場合</span>
                             </div>
                             <div class="flex items-start space-x-3 bg-gray-50 rounded-lg p-4">
                                 <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -302,13 +302,13 @@
                                 提供するサービスの内容
                             </h3>
                             <div class="bg-purple-50 rounded-xl p-6">
-                                <p class="text-gray-900 font-semibold mb-4">UNIV.Cambridge Japan Academy 英語検定 2026への参加資格</p>
+                                <p class="text-gray-900 font-semibold mb-4">UNIV.Cambridge Japan Academy 英単語選手権への参加資格</p>
                                 <div class="space-y-3">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
                                             <i class="ri-check-line text-purple-700 text-sm"></i>
                                         </div>
-                                        <span class="text-gray-700">英単語100問、イディオム50問の試験受験</span>
+                                        <span class="text-gray-700">英単語100問、イディオム50問の選手権参加</span>
                                     </div>
                                     <div class="flex items-center space-x-3">
                                         <div class="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
@@ -326,7 +326,7 @@
                                         <div class="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
                                             <i class="ri-check-line text-purple-700 text-sm"></i>
                                         </div>
-                                        <span class="text-gray-700">上位入賞者への賞品授与（ケンブリッジ旅行等）</span>
+                                        <span class="text-gray-700">上位入賞者への賞品授与（ケンブリッジ大学研修プログラムへの参加等）</span>
                                     </div>
                                 </div>
                             </div>

@@ -93,6 +93,12 @@ try {
     $application = [];
 }
 
+// 代表保護者（チーム）の場合は支払い状況ページを非表示にする
+if ($participationType === 'team' && $isGuardian) {
+    header('Location: team-status.php');
+    exit;
+}
+
 // 支払いステータスに応じた表示
 $paymentStatus = $application['payment_status'] ?? 'pending';
 $cardRegistered = $application['card_registered'] ?? false;
@@ -170,7 +176,7 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <a href="../index.php">
-                        <img src="../images/cambridge-logo.png" alt="Cambridge Logo" class="h-10">
+                        <img src="../images/UCJA_Academy_logo_fin.png" alt="Cambridge Logo" class="h-10">
                     </a>
                     <div class="border-l border-gray-300 pl-4">
                         <h1 class="text-xl font-bold text-gray-900">マイページ</h1>
@@ -208,11 +214,13 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
             <!-- 左側：ナビゲーション -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-                    <h3 class="font-bold text-gray-900 mb-4 flex items-center">
-                        <i class="ri-menu-line text-blue-600 mr-2"></i>
-                        メニュー
-                    </h3>
-                    <nav class="space-y-2">
+                    <div class="flex items-center justify-between lg:block">
+                        <button id="mobileNavToggle" class="flex items-center text-gray-900 font-bold focus:outline-none lg:cursor-default lg:pointer-events-none">
+                            <i class="ri-menu-line text-blue-600 mr-2 text-xl"></i>
+                            <span class="text-lg">メニュー</span>
+                        </button>
+                    </div>
+                    <nav id="sideNav" class="space-y-2 hidden lg:block">
                         <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                             <i class="ri-dashboard-line mr-3"></i>
                             ダッシュボード
@@ -227,10 +235,12 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
                             チーム管理
                         </a>
                         <?php endif; ?>
+                        <?php if (!($participationType === 'team' && $isGuardian)): ?>
                         <a href="payment-status.php" class="flex items-center px-4 py-3 bg-blue-50 text-blue-600 rounded-lg font-medium">
                             <i class="ri-bank-card-line mr-3"></i>
                             支払い状況
                         </a>
+                        <?php endif; ?>
                         <?php if (!$isGuardian): ?>
                         <a href="kyc-status.php" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                             <i class="ri-shield-check-line mr-3"></i>
@@ -633,6 +643,16 @@ $memberCardRegisteredAtLabel = $isTeamMemberView ? formatDateTimeLabel($teamMemb
     <script>
     // ページ読み込み時に支払い情報をAPIから取得
     document.addEventListener('DOMContentLoaded', async function() {
+        const navToggle = document.getElementById('mobileNavToggle');
+        const sideNav = document.getElementById('sideNav');
+        if (navToggle && sideNav) {
+            navToggle.addEventListener('click', () => {
+                sideNav.classList.toggle('hidden');
+                navToggle.innerHTML = sideNav.classList.contains('hidden')
+                    ? '<i class="ri-menu-fold-line mr-2"></i>メニューを表示'
+                    : '<i class="ri-menu-unfold-line mr-2"></i>メニューを隠す';
+            });
+        }
         try {
             const response = await fetch('../api/user/get-payment-status.php');
             const data = await response.json();

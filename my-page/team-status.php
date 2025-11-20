@@ -96,7 +96,7 @@ try {
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <a href="../index.php">
-                        <img src="../images/cambridge-logo.png" alt="Cambridge Logo" class="h-10">
+                        <img src="../images/UCJA_Academy_logo_fin.png" alt="Cambridge Logo" class="h-10">
                     </a>
                     <div class="border-l border-gray-300 pl-4">
                         <h1 class="text-xl font-bold text-gray-900">マイページ</h1>
@@ -140,11 +140,14 @@ try {
             <!-- 左側：ナビゲーション -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-                    <h3 class="font-bold text-gray-900 mb-4 flex items-center">
-                        <i class="ri-menu-line text-blue-600 mr-2"></i>
-                        メニュー
-                    </h3>
-                    <nav class="space-y-2">
+                    <div class="flex items-center justify-between lg:block">
+                        <button id="mobileNavToggle" class="flex items-center text-gray-900 font-bold focus:outline-none lg:cursor-default lg:pointer-events-none">
+                            <i class="ri-menu-line text-blue-600 mr-2 text-xl"></i>
+                            <span class="text-lg">メニュー</span>
+                        </button>
+                    </div>
+                    <nav id="sideNav" class="space-y-2 hidden lg:block">
+                    <nav id="sideNav" class="space-y-2.hidden lg:block">
                         <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                             <i class="ri-dashboard-line mr-3"></i>
                             ダッシュボード
@@ -157,10 +160,12 @@ try {
                             <i class="ri-team-line mr-3"></i>
                             チーム管理
                         </a>
+                        <?php if (!($participationType === 'team' && $isGuardian)): ?>
                         <a href="payment-status.php" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                             <i class="ri-bank-card-line mr-3"></i>
                             支払い状況
                         </a>
+                        <?php endif; ?>
                         <?php if (!$isGuardian): ?>
                         <a href="kyc-status.php" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                             <i class="ri-shield-check-line mr-3"></i>
@@ -383,6 +388,24 @@ try {
                         <option value="高校3年生">高校3年生</option>
                     </select>
                 </div>
+
+                <!-- 交代フラグ -->
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <label class="flex items-start space-x-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            id="edit-member-replacement"
+                            class="mt-1 w-5 h-5 text-amber-600 border-amber-300 rounded focus:ring-amber-500"
+                        >
+                        <div>
+                            <div class="font-semibold text-amber-900">チームメンバーの交代として処理する</div>
+                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                                チェックすると、このメンバーのカード登録情報・本人確認状況・自動決済スケジュールがリセットされ、新しいメンバーとして扱われます。
+                                名前だけ変更したい場合はチェックを入れないでください。
+                            </p>
+                        </div>
+                    </label>
+                </div>
                 
                 <!-- メッセージ表示エリア -->
                 <div id="edit-message" class="hidden"></div>
@@ -428,6 +451,16 @@ try {
     <script>
     // ページ読み込み時にチーム情報を取得
     document.addEventListener('DOMContentLoaded', async function() {
+        const navToggle = document.getElementById('mobileNavToggle');
+        const sideNav = document.getElementById('sideNav');
+        if (navToggle && sideNav) {
+            navToggle.addEventListener('click', () => {
+                sideNav.classList.toggle('hidden');
+                navToggle.innerHTML = sideNav.classList.contains('hidden')
+                    ? '<i class="ri-menu-fold-line mr-2"></i>メニューを表示'
+                    : '<i class="ri-menu-unfold-line mr-2"></i>メニューを隠す';
+            });
+        }
         try {
             console.log('Fetching team status...');
             const response = await fetch('../api/user/get-team-status.php');
@@ -682,6 +715,7 @@ try {
         document.getElementById('edit-member-email').value = email;
         document.getElementById('edit-member-phone').value = phone || '';
         document.getElementById('edit-member-grade').value = grade;
+        document.getElementById('edit-member-replacement').checked = false;
         document.getElementById('edit-modal').classList.remove('hidden');
         document.getElementById('edit-message').classList.add('hidden');
     }
@@ -712,7 +746,8 @@ try {
             member_name: document.getElementById('edit-member-name').value,
             member_email: document.getElementById('edit-member-email').value,
             member_phone: document.getElementById('edit-member-phone').value,
-            member_grade: document.getElementById('edit-member-grade').value
+            member_grade: document.getElementById('edit-member-grade').value,
+            member_replacement: document.getElementById('edit-member-replacement').checked
         };
         
         try {
@@ -742,11 +777,12 @@ try {
             }
             
             if (data.success) {
+                const replacementNote = data.replacement ? '（交代として各種ステータスをリセットしました）' : '';
                 // 成功メッセージ表示
                 messageDiv.innerHTML = `
                     <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center">
                         <i class="ri-check-line text-xl mr-2"></i>
-                        <span>メンバー情報を更新しました</span>
+                        <span>メンバー情報を更新しました${replacementNote}</span>
                     </div>
                 `;
                 messageDiv.classList.remove('hidden');

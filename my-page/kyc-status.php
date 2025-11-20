@@ -89,7 +89,7 @@ $isProductionEnv = (APP_ENV === 'production');
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <a href="../index.php">
-                        <img src="../images/cambridge-logo.png" alt="Cambridge Logo" class="h-10">
+                        <img src="../images/UCJA_Academy_logo_fin.png" alt="Cambridge Logo" class="h-10">
                     </a>
                     <div class="border-l border-gray-300 pl-4">
                         <h1 class="text-xl font-bold text-gray-900">マイページ</h1>
@@ -127,11 +127,13 @@ $isProductionEnv = (APP_ENV === 'production');
             <!-- 左側：ナビゲーション -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-                    <h3 class="font-bold text-gray-900 mb-4 flex items-center">
-                        <i class="ri-menu-line text-blue-600 mr-2"></i>
-                        メニュー
-                    </h3>
-                    <nav class="space-y-2">
+                    <div class="flex items-center justify-between lg:block">
+                        <button id="mobileNavToggle" class="flex items-center text-gray-900 font-bold focus:outline-none lg:cursor-default lg:pointer-events-none">
+                            <i class="ri-menu-line text-blue-600 mr-2 text-xl"></i>
+                            <span class="text-lg">メニュー</span>
+                        </button>
+                    </div>
+                    <nav id="sideNav" class="space-y-2 hidden lg:block">
                         <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                             <i class="ri-dashboard-line mr-3"></i>
                             ダッシュボード
@@ -146,10 +148,12 @@ $isProductionEnv = (APP_ENV === 'production');
                             チーム管理
                         </a>
                         <?php endif; ?>
+                        <?php if (!($participationType === 'team' && $isGuardian)): ?>
                         <a href="payment-status.php" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                             <i class="ri-bank-card-line mr-3"></i>
                             支払い状況
                         </a>
+                        <?php endif; ?>
                         <a href="kyc-status.php" class="flex items-center px-4 py-3 bg-blue-50 text-blue-600 rounded-lg font-medium">
                             <i class="ri-shield-check-line mr-3"></i>
                             本人確認状況
@@ -178,14 +182,14 @@ $isProductionEnv = (APP_ENV === 'production');
                     <p class="text-gray-600">学生証による本人確認の状況を確認できます</p>
                     <?php if ($isProductionEnv && !$kycAvailable && $kycAvailableDateLabel): ?>
                     <div class="mt-4 bg-yellow-50 border border-yellow-200 text-yellow-900 rounded-lg px-4 py-3 text-sm">
-                        本人確認は<?php echo htmlspecialchars($kycAvailableDateLabel); ?>より受付開始予定です。開始までもう少々お待ちください。
+                        <?php echo htmlspecialchars($kycAvailableDateLabel); ?>以降に学生証による本人確認を実施してください。
                     </div>
                     <?php endif; ?>
                 </div>
 
                 <!-- 本人確認ステータスカード -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div class="bg-brand-pink px-6 py-4">
+                    <div class="bg-brand-blue px-6 py-4">
                         <h3 class="text-xl font-bold text-white flex items-center">
                             <i class="ri-shield-check-line mr-2"></i>
                             本人確認ステータス
@@ -397,6 +401,16 @@ $isProductionEnv = (APP_ENV === 'production');
     <script>
     // ページ読み込み時にKYC情報をAPIから取得
     document.addEventListener('DOMContentLoaded', async function() {
+        const navToggle = document.getElementById('mobileNavToggle');
+        const sideNav = document.getElementById('sideNav');
+        if (navToggle && sideNav) {
+            navToggle.addEventListener('click', () => {
+                sideNav.classList.toggle('hidden');
+                navToggle.innerHTML = sideNav.classList.contains('hidden')
+                    ? '<i class="ri-menu-fold-line mr-2"></i>メニューを表示'
+                    : '<i class="ri-menu-unfold-line mr-2"></i>メニューを隠す';
+            });
+        }
         try {
             const response = await fetch('../api/user/get-kyc-status.php');
             const data = await response.json();

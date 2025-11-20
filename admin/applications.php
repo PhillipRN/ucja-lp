@@ -8,7 +8,7 @@ include __DIR__ . '/components/header.php';
 
 <!-- フィルター -->
 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
         <!-- 検索 -->
         <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">検索（申込番号）</label>
@@ -56,6 +56,17 @@ include __DIR__ . '/components/header.php';
                 <option value="failed">失敗</option>
             </select>
         </div>
+
+        <!-- 環境フィルター -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">環境</label>
+            <select id="environmentFilter" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">すべて</option>
+                <option value="production">本番</option>
+                <option value="development">開発</option>
+            </select>
+        </div>
     </div>
 
     <div class="mt-4 flex items-center justify-between">
@@ -91,6 +102,9 @@ include __DIR__ . '/components/header.php';
                         申込番号
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        環境
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         参加者名
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -119,7 +133,7 @@ include __DIR__ . '/components/header.php';
             <tbody id="applicationsTableBody" class="bg-white divide-y divide-gray-200">
                 <!-- JavaScriptで動的に生成 -->
                 <tr>
-                    <td colspan="9" class="px-6 py-12 text-center text-gray-400">
+                    <td colspan="10" class="px-6 py-12 text-center text-gray-400">
                         <i class="ri-loader-4-line text-4xl animate-spin"></i>
                         <p class="mt-3">読み込み中...</p>
                     </td>
@@ -147,7 +161,8 @@ async function loadApplications() {
             search: document.getElementById('searchInput').value.trim(),
             status: document.getElementById('statusFilter').value,
             participation_type: document.getElementById('typeFilter').value,
-            payment_status: document.getElementById('paymentFilter').value
+            payment_status: document.getElementById('paymentFilter').value,
+            environment: document.getElementById('environmentFilter').value
         };
 
         // URLパラメータ構築
@@ -181,7 +196,7 @@ function renderApplications(applications) {
     if (!applications || applications.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="9" class="px-6 py-12 text-center text-gray-400">
+                <td colspan="10" class="px-6 py-12 text-center text-gray-400">
                     <i class="ri-inbox-line text-4xl"></i>
                     <p class="mt-3">申込が見つかりません</p>
                 </td>
@@ -199,6 +214,16 @@ function renderApplications(applications) {
         'payment_pending': '決済待ち',
         'payment_completed': '決済完了',
         'cancelled': 'キャンセル'
+    };
+
+    const environmentLabels = {
+        'production': '本番',
+        'development': '開発'
+    };
+
+    const environmentColors = {
+        'production': 'bg-blue-100 text-blue-700',
+        'development': 'bg-gray-100 text-gray-700'
     };
 
     const statusColors = {
@@ -235,6 +260,11 @@ function renderApplications(applications) {
             <tr class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="font-semibold text-blue-600">${app.application_number}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${environmentColors[app.environment] || 'bg-gray-100 text-gray-600'}">
+                        ${environmentLabels[app.environment] || '不明'}
+                    </span>
                 </td>
                 <td class="px-6 py-4">
                     <div class="font-medium text-gray-800">${app.participant_name || '-'}</div>
@@ -343,6 +373,7 @@ function resetFilters() {
     document.getElementById('statusFilter').value = '';
     document.getElementById('typeFilter').value = '';
     document.getElementById('paymentFilter').value = '';
+    document.getElementById('environmentFilter').value = '';
     currentPage = 1;
     loadApplications();
 }
@@ -353,7 +384,7 @@ function exportCSV() {
 }
 
 // フィルター変更時に自動再読み込み
-['searchInput', 'statusFilter', 'typeFilter', 'paymentFilter'].forEach(id => {
+['searchInput', 'statusFilter', 'typeFilter', 'paymentFilter', 'environmentFilter'].forEach(id => {
     document.getElementById(id).addEventListener('change', () => {
         currentPage = 1;
         loadApplications();

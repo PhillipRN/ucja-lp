@@ -63,7 +63,7 @@
                                 </li>
                                 <li class="flex items-start">
                                     <span class="font-bold mr-2">2.</span>
-                                    <span>本人確認完了後、自動的にクレジットカード決済が実行されます</span>
+                                    <span>本人確認完了後、クレジットカード決済が実行されます</span>
                                 </li>
                                 <li class="flex items-start">
                                     <span class="font-bold mr-2">3.</span>

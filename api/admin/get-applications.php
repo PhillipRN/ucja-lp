@@ -30,6 +30,7 @@ try {
     $status = $_GET['status'] ?? '';
     $participationType = $_GET['participation_type'] ?? '';
     $paymentStatus = $_GET['payment_status'] ?? '';
+    $environment = $_GET['environment'] ?? '';
 
     $offset = ($page - 1) * $limit;
 
@@ -54,6 +55,11 @@ try {
     // 決済ステータスフィルター
     if (!empty($paymentStatus)) {
         $query = $query->eq('payment_status', $paymentStatus);
+    }
+
+    // 環境フィルター
+    if (!empty($environment)) {
+        $query = $query->eq('environment', $environment);
     }
 
     // ソート・ページネーション
@@ -111,6 +117,9 @@ try {
     }
     if (!empty($paymentStatus)) {
         $countQuery = $countQuery->eq('payment_status', $paymentStatus);
+    }
+    if (!empty($environment)) {
+        $countQuery = $countQuery->eq('environment', $environment);
     }
 
     $countResult = $countQuery->execute();

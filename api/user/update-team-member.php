@@ -63,6 +63,7 @@ try {
     $memberEmail = trim(strtolower($data['member_email'])); // メールアドレスを正規化
     $memberPhone = $data['member_phone'] ?? null;
     $memberGrade = $data['member_grade'];
+    $isReplacement = !empty($data['member_replacement']);
     
     // メールアドレスの形式チェック
     if (!filter_var($memberEmail, FILTER_VALIDATE_EMAIL)) {
@@ -123,6 +124,25 @@ try {
         'member_grade' => $memberGrade,
         'updated_at' => date('Y-m-d H:i:s')
     ];
+
+    if ($isReplacement) {
+        $updateData = array_merge($updateData, [
+            'stripe_customer_id' => null,
+            'stripe_setup_intent_id' => null,
+            'stripe_payment_method_id' => null,
+            'stripe_payment_intent_id' => null,
+            'card_registered' => false,
+            'card_registered_at' => null,
+            'card_last4' => null,
+            'card_brand' => null,
+            'payment_status' => 'pending',
+            'payment_link_sent_at' => null,
+            'scheduled_charge_date' => null,
+            'charged_at' => null,
+            'kyc_status' => 'pending',
+            'kyc_verified_at' => null
+        ]);
+    }
     
     // SupabaseClient::update() は直接使用（クエリビルダーではない）
     $updateResult = $supabase->update('team_members', $updateData, ['id' => 'eq.' . $memberId]);
@@ -130,11 +150,25 @@ try {
     if (!$updateResult['success']) {
         throw new Exception('メンバー情報の更新に失敗しました: ' . ($updateResult['error'] ?? 'Unknown error'));
     }
+
+    if ($isReplacement) {
+        // 未処理の課金スケジュールを削除
+        $supabase->delete('scheduled_charges', [
+            'team_member_id' => 'eq.' . $memberId,
+            'status' => 'in.(scheduled,processing)'
+        ]);
+
+        // 過去の試験結果を削除（交代後の誤表示防止）
+        $supabase->delete('exam_results', [
+            'team_member_id' => 'eq.' . $memberId
+        ]);
+    }
     
     // 成功レスポンス
     echo json_encode([
         'success' => true,
         'message' => 'メンバー情報を更新しました',
+        'replacement' => $isReplacement,
         'data' => [
             'member_id' => $memberId,
             'member_name' => $memberName,
